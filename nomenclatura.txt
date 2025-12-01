@@ -1,0 +1,89 @@
+# Reglas de Nomenclatura para la Clave de Servicio
+
+La "clave final" o "clave de servicio" es un código único que se genera para cada servicio y se utiliza para encontrar su precio en la lista de precios. La clave se construye concatenando varios identificadores basados en las propiedades del servicio.
+
+El orden de la nomenclatura es el siguiente:
+1.  Tipo de Servicio
+2.  Ubicación del Área
+3.  Rango de Metros Cuadrados (m²)
+4.  Acabado de la Superficie
+5.  Marca y Modelo de la Pintura
+
+---
+
+### 1. Tipo de Servicio (1ª Letra)
+Se toma la primera letra del tipo de servicio.
+- **P**INTURA -> **P**
+
+*Ejemplo: `P`*
+
+---
+
+### 2. Ubicación del Área (2ª Letra)
+Se toma la primera letra de la ubicación del área donde se realizará el servicio.
+- **I**NTERIOR -> **I**
+- **E**XTERIOR -> **E**
+
+*Ejemplo: `PE` (Pintura en Exterior)*
+
+---
+
+### 3. Rango de Metros Cuadrados (m²) (3ª Letra)
+Se asigna una letra según la cantidad total de metros cuadrados a cubrir. La tabla de rangos se define en `lib/lista_precios_servicio.ts`.
+- Rango A: 0 - 300 m² -> **A**
+- Rango B: 301 - 700 m² -> **B**
+- Rango C: 701 - 1500 m² -> **C**
+- Rango D: 1501 - 3000 m² -> **D**
+- Rango E: 3001 - 5000 m² -> **E**
+- Rango F: 5001+ m² -> **F**
+
+*Ejemplo: `PEA` (Pintura en Exterior, para un área de 150 m²)*
+
+---
+
+### 4. Acabado de la Superficie (4ª Letra)
+Se toma la primera letra del tipo de acabado de la superficie.
+- **L**ISO -> **L**
+- **R**UGOSO -> **R**
+- E**X**TRARUGOSO -> **X**
+
+*Ejemplo: `PEAR` (Pintura en Exterior, 150 m², sobre superficie Rugosa)*
+
+---
+
+### 5. Marca y Modelo (Resto de la Clave)
+Se concatena el código compacto que identifica la marca y el modelo de la pintura a utilizar.
+- StarColors Vinil-Acrílica Regular -> **SCVinR**
+
+*Ejemplo: `PEARSCVinR`*
+
+---
+**Resumen de Cambios al 01 de Diciembre de 2025**
+
+**1. Refactorización de la Página de Nuevo Presupuesto:**
+   - La página `app/presupuestos/nuevo/page.tsx` fue reestructurada para utilizar un enfoque basado en componentes.
+   - Se crearon los siguientes componentes en `components/presupuestos/`:
+     - `AreaForm.tsx`: Para agregar nuevas áreas a la cotización.
+     - `ServiceForm.tsx`: Para agregar servicios dentro de un área específica.
+     - `QuoteForm.tsx`: El componente principal que orquesta la creación de la cotización, manejando el estado de las áreas y servicios, y la lógica de envío.
+   - El `app/presupuestos/nuevo/page.tsx` ahora solo renderiza el `QuoteForm`.
+
+**2. Solución a Error de Hydration (Button Anidado):**
+   - Se corrigió un error de hidratación causado por un elemento `<Button>` anidado dentro de un `AccordionTrigger` en `QuoteForm.tsx`.
+   - La solución implicó reemplazar el `<Button>` interno con un `<div>` semánticamente apropiado, que simula el estilo del botón y evita la propagación del evento `onClick` al `AccordionTrigger` usando `e.stopPropagation()`.
+
+**3. Implementación de Lógica de Cálculo de Presupuesto:**
+   - Se ajustó la función `buildClaveDeServicio` en `app/api/calcula-presupuesto/route.ts` para que el código de superficie `EXTRARUGOSO` sea 'X' en lugar de 'ER'.
+   - Se corrigieron las claves de precios en `lib/lista_precios_servicio.ts` para las superficies `EXTRARUGOSO` para que coincidieran con la nueva nomenclatura ('PEAXSCVinR', 'PEBXSCVinR', 'PECXSCVinR').
+   - Se agregaron las claves de precios para servicios en `INTERIOR` (ej. `PIALSCVinR`, `PIBLSCVinR`, etc.) en `lib/lista_precios_servicio.ts`, asumiendo precios iguales a los de `EXTERIOR` por el momento.
+   - El campo `marcaModelo` en `components/presupuestos/ServiceForm.tsx` se marcó como `disabled` para indicar que su valor es fijo por ahora.
+
+**4. Corrección de Bug de Primer Servicio y Mejora de UI:**
+   - Se solucionó un bug en `QuoteForm.tsx` donde el primer servicio agregado a un área recién creada no se incluía en el cálculo, utilizando la forma de actualización funcional de `setAreas` en `handleAddService`.
+   - Se mejoró la interfaz de usuario para mostrar el "nombre de área" y "superficie en m2" junto a la clave generada en los resultados del presupuesto (ejemplo: "Cocina 75m2 PEARSCVinE"). Esto implicó pasar el `areaName` desde el frontend al backend y devolverlo en la respuesta de la API.
+   - Se eliminaron todos los `console.log` de depuración.
+
+---
+**Último Prompt Recibido:**
+`muy bien, ahora quiero que modifiques la UI para que en quotes al calcular me salgan los datos de "nombre de area" y "superficie en m2", ejemplo completo: "Cocina 75m2 PEARSCVinE", así puedo confirmar que áreas ya fueron tomadas en cuenta. Y aparte de esto, veo que cuando recien se crea el área y se le agrega el primer servicio, este servicio no se considera, es necesario hacer un segundo o borrarlo y volverlo a hacer. ¿puedes verificar por que puede pasar esto? lo veo como que puede ser un problema con los estados, pero tu verificalo y dame una posible solución.`
+---
