@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, FormEvent, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,15 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Service } from "./AreaForm"; // Reutilizamos la interfaz
+import { Service } from "./AreaForm";
+import { Combobox } from "@/components/ui/combobox";
+import { MarcasModelos } from "@/lib/lista_marcas_modelos";
 
 // Omitimos 'id' ya que será generado al añadir el servicio
 type ServiceFormData = Omit<Service, "id">;
 
 interface ServiceFormProps {
-  // La función onSubmit ahora recibe los datos del formulario del servicio
   onSubmit: (serviceData: ServiceFormData) => void;
-  // Para cerrar el diálogo desde el formulario (ej. después de enviar)
   onClose: () => void;
 }
 
@@ -27,25 +25,21 @@ const initialState: ServiceFormData = {
   tipoServicio: 'PINTURA',
   cantidadM2: 0,
   tipoSuperficie: 'LISO',
-  marcaModelo: 'SCVinR',
+  marcaModelo: 'SCVINR',
 };
 
 export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
   const [formData, setFormData] = useState<ServiceFormData>(initialState);
 
-  const handleChange = (
-    field: keyof ServiceFormData,
-    value: any
-  ) => {
+  const handleChange = (field: keyof ServiceFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
-    // Opcional: Resetear el formulario después de enviar
     setFormData(initialState);
-    onClose(); // Cierra el diálogo
+    onClose();
   };
 
   return (
@@ -88,7 +82,10 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
           <Select
             value={formData.tipoSuperficie}
             onValueChange={(v) =>
-              handleChange('tipoSuperficie', v as 'LISO' | 'RUGOSO' | 'EXTRARUGOSO')
+              handleChange(
+                'tipoSuperficie',
+                v as 'LISO' | 'RUGOSO' | 'EXTRARUGOSO'
+              )
             }
           >
             <SelectTrigger id="service-superficie" className="border-input">
@@ -104,17 +101,14 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
 
         {/* Marca/Modelo */}
         <div className="space-y-1.5">
-          <Label htmlFor="service-marca">Marca/Modelo (Compacta)</Label>
-          <Input
-            id="service-marca"
-            type="text"
+          <Label htmlFor="service-marca">Marca/Modelo</Label>
+          <Combobox
+            options={MarcasModelos}
             value={formData.marcaModelo}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleChange('marcaModelo', e.target.value)
-            }
-            placeholder="Ej: SCVinR"
-            className="border-input"
-            disabled
+            onChange={(v) => handleChange('marcaModelo', v)}
+            placeholder="Selecciona una clave"
+            searchPlaceholder="Busca una clave..."
+            noResultsMessage="No se encontró la clave."
           />
         </div>
       </div>

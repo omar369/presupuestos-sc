@@ -94,9 +94,9 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const precioPorM2 = preciosPorTipoServicio[claveGenerada];
+      const serviceInfo = preciosPorTipoServicio[claveGenerada];
 
-      if (precioPorM2 === undefined) {
+      if (serviceInfo === undefined) {
         detallesServicios.push({
           id: service.id,
           areaName: service.areaName,
@@ -109,14 +109,14 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const costoTotal = precioPorM2 * service.cantidadM2;
+      const costoTotal = serviceInfo.precio * service.cantidadM2;
       totalGeneral += costoTotal;
 
       detallesServicios.push({
         id: service.id,
         areaName: service.areaName,
         claveGenerada: claveGenerada,
-        precioPorM2: precioPorM2,
+        precioPorM2: serviceInfo.precio,
         cantidadM2: service.cantidadM2,
         costoTotal: costoTotal,
       });
