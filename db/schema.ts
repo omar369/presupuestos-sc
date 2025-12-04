@@ -96,7 +96,6 @@ export const areasRelations = relations(areas, ({ one, many }) => ({
     fields: [areas.presupuestoId],
     references: [presupuestos.id],
   }),
-  servicios: many(servicios),
 }));
 
 // Tabla de servicios por área
