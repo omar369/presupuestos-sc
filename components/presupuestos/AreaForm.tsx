@@ -17,11 +17,11 @@ export interface Area {
 }
 
 export interface Service {
-    id: string;
-    tipoServicio: 'PINTURA';
-    cantidadM2: number;
-    tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
-    marcaModelo: string;
+  id: string;
+  tipoServicio: 'PINTURA';
+  cantidadM2: number;
+  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
+  marcaModelo: string;
 }
 
 interface AreaFormProps {

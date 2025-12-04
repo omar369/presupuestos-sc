@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import { ServiciosPrecios, getRangoM2Key } from '@/lib/lista_precios_servicio';
 
 interface ServiceInput {
-  id: string; // Un ID temporal para identificar el servicio en el frontend
+  id: string;
   areaName?: string;
-  tipoServicio: 'PINTURA'; // O 'IMPERMEABILIZANTE', etc.
+  tipoServicio: 'PINTURA';
   ubicacion: 'INTERIOR' | 'EXTERIOR';
   cantidadM2: number;
   tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
-  marcaModelo: string; // Ejemplo: "StarColors Vin-E". ASUMIMOS que ya viene compactada para la clave (ej. "SCVinE")
+  marcaModelo: string;
 }
 
 interface DetailedServiceResult {
@@ -18,21 +18,21 @@ interface DetailedServiceResult {
   precioPorM2: number;
   cantidadM2: number;
   costoTotal: number;
-  error?: string; // Para errores específicos de este servicio
+  error?: string;
 }
 
 interface CalculateQuoteResponse {
   totalGeneral: number;
   detallesServicios: DetailedServiceResult[];
-  error?: string; // Para errores generales de la API
+  error?: string;
 }
 
 function buildClaveDeServicio(params: ServiceInput): string {
   const { tipoServicio, ubicacion, cantidadM2, tipoSuperficie, marcaModelo } = params;
 
-  const ts = tipoServicio[0].toUpperCase(); 
+  const ts = tipoServicio[0].toUpperCase();
 
-  const ub = ubicacion[0].toUpperCase(); 
+  const ub = ubicacion[0].toUpperCase();
 
   const rm2 = getRangoM2Key(cantidadM2);
 
@@ -40,7 +40,7 @@ function buildClaveDeServicio(params: ServiceInput): string {
   if (tipoSuperficie === 'LISO') tsuf = 'L';
   else if (tipoSuperficie === 'RUGOSO') tsuf = 'R';
   else if (tipoSuperficie === 'EXTRARUGOSO') tsuf = 'X';
-  else tsuf = 'X'; // Fallback para tipo de superficie no reconocido
+  else tsuf = 'X';
 
   const mm = marcaModelo;
 
@@ -66,13 +66,13 @@ export async function POST(request: Request) {
       // Validaciones básicas de cada servicio
       if (!service.tipoServicio || !service.ubicacion || service.cantidadM2 === undefined || service.cantidadM2 < 0 || !service.tipoSuperficie || !service.marcaModelo) {
         detallesServicios.push({
-            id: service.id,
-            areaName: service.areaName,
-            claveGenerada: "N/A",
-            precioPorM2: 0,
-            cantidadM2: service.cantidadM2,
-            costoTotal: 0,
-            error: `Datos incompletos o inválidos para el servicio con ID: ${service.id || 'desconocido'}.`
+          id: service.id,
+          areaName: service.areaName,
+          claveGenerada: "N/A",
+          precioPorM2: 0,
+          cantidadM2: service.cantidadM2,
+          costoTotal: 0,
+          error: `Datos incompletos o inválidos para el servicio con ID: ${service.id || 'desconocido'}.`
         });
         continue;
       }
@@ -83,13 +83,13 @@ export async function POST(request: Request) {
       const preciosPorTipoServicio = ServiciosPrecios[service.tipoServicio];
       if (!preciosPorTipoServicio) {
         detallesServicios.push({
-            id: service.id,
-            areaName: service.areaName,
-            claveGenerada: claveGenerada,
-            precioPorM2: 0,
-            cantidadM2: service.cantidadM2,
-            costoTotal: 0,
-            error: `Tipo de servicio '${service.tipoServicio}' no encontrado en la lista de precios.`,
+          id: service.id,
+          areaName: service.areaName,
+          claveGenerada: claveGenerada,
+          precioPorM2: 0,
+          cantidadM2: service.cantidadM2,
+          costoTotal: 0,
+          error: `Tipo de servicio '${service.tipoServicio}' no encontrado en la lista de precios.`,
         });
         continue;
       }
@@ -98,15 +98,15 @@ export async function POST(request: Request) {
 
       if (precioPorM2 === undefined) {
         detallesServicios.push({
-            id: service.id,
-            areaName: service.areaName,
-            claveGenerada: claveGenerada,
-            precioPorM2: 0, // No se encontró precio
-            cantidadM2: service.cantidadM2,
-            costoTotal: 0, // No se encontró precio
-            error: `Clave de servicio '${claveGenerada}' no encontrada en la lista de precios para '${service.tipoServicio}'.`,
+          id: service.id,
+          areaName: service.areaName,
+          claveGenerada: claveGenerada,
+          precioPorM2: 0,
+          cantidadM2: service.cantidadM2,
+          costoTotal: 0,
+          error: `Clave de servicio '${claveGenerada}' no encontrada en la lista de precios para '${service.tipoServicio}'.`,
         });
-        continue; // Continúa procesando otros servicios si uno no tiene precio
+        continue;
       }
 
       const costoTotal = precioPorM2 * service.cantidadM2;
