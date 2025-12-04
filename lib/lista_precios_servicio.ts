@@ -25,35 +25,35 @@ export const ServiciosPrecios: IServicePriceList = {
   PINTURA: {
     //LAS PRIMERAS 9 LISTAS DE STAR COLORS VIN-R PRO EXTERIOR...
     // Superficie LISO (vinR, 7 años)
-    'PEALSCVinR': 73.00, 
+    'PEALSCVinR': 73.00,
     'PEBLSCVinR': 70.00,
     'PECLSCVinR': 67.00,
 
     // Superficie RUGOSO
-    'PEARSCVinR': 85.00, 
-    'PEBRSCVinR': 82.00, 
-    'PECRSCVinR': 79.00, 
+    'PEARSCVinR': 85.00,
+    'PEBRSCVinR': 82.00,
+    'PECRSCVinR': 79.00,
 
     // Superficie EXTRARUGOSO
     'PEAXSCVinR': 95.00,
-    'PEBXSCVinR': 92.00, 
+    'PEBXSCVinR': 92.00,
     'PECXSCVinR': 89.00,
 
     // -- STAR COLORS VIN-R PRO INTERIOR --
     // Superficie LISO (vinR, 7 años)
-    'PIALSCVinR': 73.00, 
+    'PIALSCVinR': 73.00,
     'PIBLSCVinR': 70.00,
     'PICLSCVinR': 67.00,
 
     // Superficie RUGOSO
-    'PIARSCVinR': 85.00, 
-    'PIBRSCVinR': 82.00, 
-    'PICRSCVinR': 79.00, 
+    'PIARSCVinR': 85.00,
+    'PIBRSCVinR': 82.00,
+    'PICRSCVinR': 79.00,
 
     // Superficie EXTRARUGOSO
     'PIAXSCVinR': 95.00,
-    'PIBXSCVinR': 92.00, 
-    'PICXSCVinR': 89.00, 
+    'PIBXSCVinR': 92.00,
+    'PICXSCVinR': 89.00,
 
     //claves:precioUnit... 
   },

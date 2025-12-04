@@ -1,4 +1,3 @@
-// components/presupuestos/ServiceForm.tsx
 "use client";
 
 import { useState, FormEvent, ChangeEvent } from "react";
@@ -21,7 +20,7 @@ interface ServiceFormProps {
   // La función onSubmit ahora recibe los datos del formulario del servicio
   onSubmit: (serviceData: ServiceFormData) => void;
   // Para cerrar el diálogo desde el formulario (ej. después de enviar)
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 const initialState: ServiceFormData = {
@@ -45,7 +44,7 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
     e.preventDefault();
     onSubmit(formData);
     // Opcional: Resetear el formulario después de enviar
-    setFormData(initialState); 
+    setFormData(initialState);
     onClose(); // Cierra el diálogo
   };
 
