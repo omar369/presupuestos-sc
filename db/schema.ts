@@ -49,7 +49,7 @@ export const clientes = sqliteTable("clientes", {
 });
 
 export const clientesRelations = relations(clientes, ({ many }) => ({
-  presupuestos: many(() => presupuestos),
+  presupuestos: many(presupuestos),
 }));
 
 // Tabla de presupuestos: uno por flujo de cotización
@@ -68,11 +68,11 @@ export const presupuestos = sqliteTable("presupuestos", {
 });
 
 export const presupuestosRelations = relations(presupuestos, ({ one, many }) => ({
-  cliente: one(() => clientes, {
+  cliente: one(clientes, {
     fields: [presupuestos.clienteId],
     references: [clientes.id],
   }),
-  areas: many(() => areas),
+  areas: many(areas),
 }));
 
 // Tabla de áreas que pertenecen a un presupuesto
@@ -92,11 +92,11 @@ export const areas = sqliteTable("areas", {
 });
 
 export const areasRelations = relations(areas, ({ one, many }) => ({
-  presupuesto: one(() => presupuestos, {
+  presupuesto: one(presupuestos, {
     fields: [areas.presupuestoId],
     references: [presupuestos.id],
   }),
-  servicios: many(() => servicios),
+  servicios: many(servicios),
 }));
 
 // Tabla de servicios por área
@@ -118,7 +118,7 @@ export const servicios = sqliteTable("servicios", {
 });
 
 export const serviciosRelations = relations(servicios, ({ one }) => ({
-  area: one(() => areas, {
+  area: one(areas, {
     fields: [servicios.areaId],
     references: [areas.id],
   }),
