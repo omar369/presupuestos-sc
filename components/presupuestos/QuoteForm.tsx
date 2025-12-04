@@ -22,8 +22,8 @@ import { Plus, Trash2 } from 'lucide-react';
 
 // Interfaces de la respuesta de la API (similares al archivo original)
 interface DetailedServiceResult {
-  id: string; // Corresponde al ID Ãºnico del servicio en el frontend
-  areaName?: string; // Nombre del Ã¡rea a la que pertenece
+  id: string;
+  areaName?: string;
   claveGenerada: string;
   precioPorM2: number;
   cantidadM2: number;
@@ -122,9 +122,7 @@ export function QuoteForm() {
         throw new Error(errorData.error || "Error al guardar el presupuesto.");
       }
 
-      // Opcional: manejar la respuesta exitosa, por ejemplo, mostrando un mensaje
-      // o redirigiendo al usuario.
-      alert("Presupuesto guardado con éxito!");
+      alert('Presupuesto guardado con éxito!');
 
     } catch (err: any) {
       setError(err.message);
@@ -266,10 +264,10 @@ export function QuoteForm() {
 
         {presupuesto && areas.length > 0 && (
           <div className="flex justify-end pt-4 gap-x-4">
-            <Button type="submit" disabled={loading} size="lg">
-              {loading ? 'Calculando…' : 'Calcular Presupuesto Total'}
+            <Button type="submit" disabled={loading} size="sm">
+              {loading ? 'Actualizando…' : 'Actualizar Sub-total'}
             </Button>
-            <Button type="button" onClick={handleSave} disabled={loading} size="lg" variant="secondary">
+            <Button type="button" onClick={handleSave} disabled={loading} size="sm" variant="secondary">
               {loading ? 'Guardando…' : 'Guardar Presupuesto'}
             </Button>
           </div>
@@ -286,7 +284,7 @@ export function QuoteForm() {
           <div className='flex justify-between items-start mb-6'>
             <div>
               <h3 className="text-lg font-semibold">Resultados del Presupuesto</h3>
-              <p className="text-sm text-muted-foreground">Desglose de los servicios cotizados.</p>
+              <p className="text-xs text-muted-foreground">Desglose de los servicios cotizados.</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Total General</p>
@@ -297,7 +295,7 @@ export function QuoteForm() {
           {/* Contenedor de la tabla de detalles */}
           <div className="space-y-4">
             {/* Encabezados de la tabla */}
-            <div className="grid grid-cols-5 gap-4 text-sm text-muted-foreground font-medium border-b pb-2">
+            <div className="grid grid-cols-5 gap-4 text-xs text-muted-foreground font-medium border-b pb-2">
               <div className="col-span-1">Área</div>
               <div className="col-span-1">Servicio</div>
               <div className="col-span-1 text-right">Total m²</div>
@@ -310,10 +308,10 @@ export function QuoteForm() {
               {detailedResults.map((d) => (
                 <div key={d.id} className="grid grid-cols-5 gap-4 items-center border-b border-dashed border-border/50 pb-3">
                   <div className="col-span-1 font-medium">{d.areaName}</div>
-                  <div className="col-span-1 text-sm text-muted-foreground">{d.claveGenerada}</div>
-                  <div className="col-span-1 text-right">{d.cantidadM2.toFixed(2)} m²</div>
-                  <div className="col-span-1 text-right">${d.precioPorM2.toFixed(2)}</div>
-                  <div className="col-span-1 text-right font-semibold">${d.costoTotal.toFixed(2)}</div>
+                  <div className="col-span-1 text-xs text-muted-foreground">{d.claveGenerada}</div>
+                  <div className="col-span-1 text-right text-xs">{d.cantidadM2.toFixed(2)} m²</div>
+                  <div className="col-span-1 text-right text-xs">${d.precioPorM2.toFixed(2)}</div>
+                  <div className="col-span-1 text-right text-xs font-semibold">${d.costoTotal.toFixed(2)}</div>
                 </div>
               ))}
             </div>
