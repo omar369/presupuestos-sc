@@ -1,14 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { Presupuesto, Area, Servicio, Cliente } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PdfPresupuesto from "./PdfPresupuesto"; // Asegúrate que la ruta es correcta
 
 // Extendemos los tipos para incluir las relaciones que vienen de la consulta
 type ServicioConPrecio = Servicio & { precioUnitario: number; importe: number };
-type AreaConServicios = Area & { servicios: ServicioConPrecio[] }; // Corregido de 'services'
+type AreaConServicios = Area & { servicios: ServicioConPrecio[] };
 type PresupuestoCompleto = Presupuesto & {
   cliente: Cliente | null;
   areas: AreaConServicios[];
@@ -20,16 +23,59 @@ interface PresupuestoViewProps {
 
 export function PresupuestoView({ budget }: PresupuestoViewProps) {
   const { cliente, areas, createdAt, subtotal, impuestos, total } = budget;
+
+  // Estado para asegurar que el link de PDF solo se renderice en el cliente
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
+  // Preparamos los datos para el componente PDF
+  const presupuestoDataForPdf = {
+    id: budget.id,
+    createdAt: budget.createdAt,
+    clienteNombre: budget.cliente?.nombre || 'N/A',
+    clienteDireccion: budget.cliente?.direccion || 'N/A',
+    subtotal: budget.subtotal,
+    impuestos: budget.impuestos,
+    total: budget.total,
+    areas: budget.areas.map(area => ({
+      nombre: area.nombre,
+      servicios: area.servicios.map(s => ({
+        cantidadM2: s.cantidadM2,
+        unidadDeMedida: s.unidadDeMedida,
+        tipoServicio: s.tipoServicio,
+        tipoSuperficie: s.tipoSuperficie,
+        marcaModelo: s.marcaModelo,
+        precioUnitario: s.precioUnitario,
+        importe: s.importe,
+      })),
+    })),
+  };
+
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-6 bg-gray-50">
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link href="/presupuestos" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
           &larr; Volver al Historial
         </Link>
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
-          Imprimir o Guardar como PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            Imprimir Pantalla
+          </Button>
+          {isClient && (
+            <PDFDownloadLink
+              document={<PdfPresupuesto presupuesto={presupuestoDataForPdf} />}
+              fileName={`presupuesto_${String(budget.id).padStart(4, '0')}.pdf`}
+            >
+              {({ loading }) => (
+                <Button variant="default" size="sm">
+                  {loading ? 'Generando PDF...' : 'Imprimir PDF'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
+        </div>
       </div>
 
       <Card className="w-full mx-auto shadow-lg print:shadow-none print:border-none">
@@ -84,7 +130,7 @@ export function PresupuestoView({ budget }: PresupuestoViewProps) {
                             <p className="font-medium">{service.tipoServicio} {service.tipoSuperficie}</p>
                             <p className="text-xs text-muted-foreground">{service.marcaModelo}</p>
                           </td>
-                          <td className="p-2 text-right">{service.cantidadM2.toFixed(2)} m²</td>
+                          <td className="p-2 text-right">{service.cantidadM2.toFixed(2)} {service.unidadDeMedida}</td>
                           <td className="p-2 text-right">${service.precioUnitario.toFixed(2)}</td>
                           <td className="p-2 text-right font-medium">${service.importe.toFixed(2)}</td>
                         </tr>

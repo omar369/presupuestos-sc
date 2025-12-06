@@ -109,6 +109,7 @@ export const servicios = sqliteTable("servicios", {
     .notNull()
     .references(() => areas.id, { onDelete: "cascade", onUpdate: "cascade" }),
   tipoServicio: text("tipo_servicio", { enum: ["PINTURA"] as const }).notNull(),
+  unidadDeMedida: text("unidad_de_medida", { enum: ["m2", "ml"] as const }).notNull().default("m2"),
   cantidadM2: real("cantidad_m2").notNull(),
   tipoSuperficie: text("tipo_superficie", { enum: ["LISO", "RUGOSO", "EXTRARUGOSO"] as const }).notNull(),
   marcaModelo: text("marca_modelo").notNull(),

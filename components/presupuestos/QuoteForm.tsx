@@ -128,7 +128,7 @@ export function QuoteForm() {
     const validation = quoteSchema.safeParse(payload);
 
     if (!validation.success) {
-      const errorMessages = validation.error.errors.map(e => e.message).join(' ');
+      const errorMessages = validation.error.issues.map(e => e.message).join(' ');
       setError(`Error de validación: ${errorMessages}`);
       setLoading(false);
       return;

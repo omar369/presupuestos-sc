@@ -60,7 +60,7 @@ export default function PresupuestosPage() {
             Crear Nuevo Presupuesto
           </Button>
         </div>
-        
+
         {loading && <p className="mt-4 text-center">Cargando presupuestos...</p>}
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
 

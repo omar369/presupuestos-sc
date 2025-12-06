@@ -18,6 +18,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { MarcasModelos } from "@/lib/lista_marcas_modelos";
 import { serviceSchema } from "@/lib/schemas";
 
+// El tipo inferido del schema ahora tiene cantidadM2 como STRING
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
 interface ServiceFormProps {
@@ -37,13 +38,13 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       tipoServicio: 'PINTURA',
-      cantidadM2: 0,
+      unidadDeMedida: 'm2', // Valor por defecto
+      cantidadM2: '0', 
       tipoSuperficie: 'LISO',
-      marcaModelo: MarcasModelos[0].value, // Set initial default from the list
+      marcaModelo: MarcasModelos[0].value,
     },
   });
   
-  // Watch the 'marcaModelo' field to make the Combobox a controlled component
   const marcaModeloValue = useWatch({
     control,
     name: 'marcaModelo',
@@ -57,9 +58,9 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
 
   return (
     <form onSubmit={handleSubmit(processForm)} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Tipo de Servicio */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 sm:col-span-3">
           <Label htmlFor="service-tipo">Tipo de Servicio</Label>
           <Select
             defaultValue={control._defaultValues.tipoServicio}
@@ -77,18 +78,39 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
           )}
         </div>
 
-        {/* Cantidad M2 */}
+        {/* Cantidad */}
         <div className="space-y-1.5">
-          <Label htmlFor="service-m2">Cantidad M2</Label>
+          <Label htmlFor="service-cantidad">Cantidad</Label>
           <Input
-            id="service-m2"
-            type="number"
+            id="service-cantidad"
+            type="text"
+            inputMode="decimal"
             step="0.01"
             {...register('cantidadM2')}
             className="border-input"
           />
-          {errors.cantidadM2 && (
-            <p className="text-sm text-red-500">{errors.cantidadM2.message}</p>
+          {errors.cantidadM2?.message && (
+            <p className="text-sm text-red-500">{errors.cantidadM2?.message}</p>
+          )}
+        </div>
+
+        {/* Unidad de Medida */}
+        <div className="space-y-1.5">
+          <Label htmlFor="service-unidad">Unidad</Label>
+          <Select
+             defaultValue={control._defaultValues.unidadDeMedida}
+             onValueChange={(value) => setValue('unidadDeMedida', value as 'm2' | 'ml')}
+          >
+            <SelectTrigger id="service-unidad" className="border-input">
+              <SelectValue placeholder="Selecciona unidad" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="m2">m2</SelectItem>
+              <SelectItem value="ml">ml</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.unidadDeMedida && (
+            <p className="text-sm text-red-500">{errors.unidadDeMedida.message}</p>
           )}
         </div>
 
@@ -114,7 +136,7 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
         </div>
 
         {/* Marca/Modelo */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 sm:col-span-3">
           <Label htmlFor="service-marca">Marca/Modelo</Label>
           <Combobox
             options={MarcasModelos}

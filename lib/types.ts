@@ -17,7 +17,8 @@ export interface BudgetData {
 export interface Service {
   id: string;
   tipoServicio: 'PINTURA';
-  cantidadM2: number;
+  unidadDeMedida: 'm2' | 'ml';
+  cantidadM2: string;
   tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
   marcaModelo: string;
 }

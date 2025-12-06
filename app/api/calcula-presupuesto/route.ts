@@ -6,7 +6,8 @@ interface ServiceInput {
   areaName?: string;
   tipoServicio: 'PINTURA';
   ubicacion: 'INTERIOR' | 'EXTERIOR';
-  cantidadM2: number;
+  cantidadM2: string; // Acepta string desde el frontend
+  unidadDeMedida: 'm2' | 'ml';
   tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
   marcaModelo: string;
 }
@@ -16,7 +17,7 @@ interface DetailedServiceResult {
   areaName?: string;
   claveGenerada: string;
   precioPorM2: number;
-  cantidadM2: number;
+  cantidadM2: number; // Devuelve número
   costoTotal: number;
   error?: string;
 }
@@ -29,8 +30,15 @@ interface CalculateQuoteResponse {
   error?: string;
 }
 
-function buildClaveDeServicio(params: ServiceInput): string {
-  const { tipoServicio, ubicacion, cantidadM2, tipoSuperficie, marcaModelo } = params;
+function buildClaveDeServicio(params: {
+  tipoServicio: 'PINTURA';
+  ubicacion: 'INTERIOR' | 'EXTERIOR';
+  cantidadM2: number; // Espera número para el cálculo
+  unidadDeMedida: 'm2' | 'ml';
+  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
+  marcaModelo: string;
+}): string {
+  const { tipoServicio, ubicacion, cantidadM2, tipoSuperficie, marcaModelo, unidadDeMedida } = params;
 
   const ts = tipoServicio[0].toUpperCase();
 
@@ -45,8 +53,11 @@ function buildClaveDeServicio(params: ServiceInput): string {
   else tsuf = 'X';
 
   const mm = marcaModelo;
+  
+  // Se añade la unidad de medida a la clave para diferenciar precios si es necesario en el futuro
+  const um = unidadDeMedida.toUpperCase();
 
-  return `${ts}${ub}${rm2}${tsuf}${mm}`;
+  return `${ts}${ub}${rm2}${tsuf}${mm}${um}`;
 }
 
 
@@ -65,21 +76,23 @@ export async function POST(request: Request) {
     const detallesServicios: DetailedServiceResult[] = [];
 
     for (const service of services) {
+      const cantidadM2Num = parseFloat(service.cantidadM2);
+
       // Validaciones básicas de cada servicio
-      if (!service.tipoServicio || !service.ubicacion || service.cantidadM2 === undefined || service.cantidadM2 < 0 || !service.tipoSuperficie || !service.marcaModelo) {
+      if (!service.tipoServicio || !service.ubicacion || !service.cantidadM2 || isNaN(cantidadM2Num) || cantidadM2Num < 0 || !service.tipoSuperficie || !service.marcaModelo || !service.unidadDeMedida) {
         detallesServicios.push({
           id: service.id,
           areaName: service.areaName,
           claveGenerada: "N/A",
           precioPorM2: 0,
-          cantidadM2: service.cantidadM2,
+          cantidadM2: isNaN(cantidadM2Num) ? 0 : cantidadM2Num,
           costoTotal: 0,
           error: `Datos incompletos o inválidos para el servicio con ID: ${service.id || 'desconocido'}.`
         });
         continue;
       }
-
-      const claveGenerada = buildClaveDeServicio(service);
+      
+      const claveGenerada = buildClaveDeServicio({ ...service, cantidadM2: cantidadM2Num });
 
       // Buscar el precio en nuestra "base de datos" en memoria
       const preciosPorTipoServicio = ServiciosPrecios[service.tipoServicio];
@@ -89,7 +102,7 @@ export async function POST(request: Request) {
           areaName: service.areaName,
           claveGenerada: claveGenerada,
           precioPorM2: 0,
-          cantidadM2: service.cantidadM2,
+          cantidadM2: cantidadM2Num,
           costoTotal: 0,
           error: `Tipo de servicio '${service.tipoServicio}' no encontrado en la lista de precios.`,
         });
@@ -104,14 +117,14 @@ export async function POST(request: Request) {
           areaName: service.areaName,
           claveGenerada: claveGenerada,
           precioPorM2: 0,
-          cantidadM2: service.cantidadM2,
+          cantidadM2: cantidadM2Num,
           costoTotal: 0,
           error: `Clave de servicio '${claveGenerada}' no encontrada en la lista de precios para '${service.tipoServicio}'.`,
         });
         continue;
       }
 
-      const costoTotal = serviceInfo.precio * service.cantidadM2;
+      const costoTotal = serviceInfo.precio * cantidadM2Num;
       subtotal += costoTotal;
 
       detallesServicios.push({
@@ -119,7 +132,7 @@ export async function POST(request: Request) {
         areaName: service.areaName,
         claveGenerada: claveGenerada,
         precioPorM2: serviceInfo.precio,
-        cantidadM2: service.cantidadM2,
+        cantidadM2: cantidadM2Num,
         costoTotal: costoTotal,
       });
     }

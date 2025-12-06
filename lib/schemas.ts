@@ -6,12 +6,18 @@ export const serviceSchema = z.object({
   tipoServicio: z.enum(['PINTURA'], {
     message: 'El tipo de servicio es obligatorio.',
   }),
-  cantidadM2: z.coerce
-    .number({
-      error: 'Debe ser un número.',
+  unidadDeMedida: z.enum(['m2', 'ml'], {
+    message: 'La unidad de medida es obligatoria.',
+  }),
+  cantidadM2: z
+    .string({ message: 'Debe ser un número.' })
+    .min(1, { message: 'La cantidad es obligatoria.' })
+    .regex(/^\d+(\.\d{1,2})?$/, {
+      message: 'Debe ser un número válido con hasta 2 decimales.',
     })
-    .positive('La cantidad debe ser mayor a 0.')
-    .multipleOf(0.01, 'Debe tener un máximo de 2 decimales.'),
+    .refine((val) => parseFloat(val) > 0, {
+      message: 'La cantidad debe ser mayor a 0.',
+    }),
 
   tipoSuperficie: z.enum(['LISO', 'RUGOSO', 'EXTRARUGOSO'], {
     message: 'El tipo de superficie es obligatorio.',

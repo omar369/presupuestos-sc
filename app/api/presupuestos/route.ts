@@ -45,10 +45,16 @@ export async function POST(req: Request) {
 
         if (area.services && area.services.length > 0) {
           for (const service of area.services) {
+            const cantidadM2Num = parseFloat(service.cantidadM2);
+            if (isNaN(cantidadM2Num)) {
+              // Si la conversión falla, se lanza un error para abortar la transacción
+              throw new Error(`Valor inválido para cantidadM2 en el servicio con ID de área ${areaId}`);
+            }
             await tx.insert(servicios).values({
               areaId,
               tipoServicio: service.tipoServicio,
-              cantidadM2: service.cantidadM2,
+              unidadDeMedida: service.unidadDeMedida,
+              cantidadM2: cantidadM2Num,
               tipoSuperficie: service.tipoSuperficie,
               marcaModelo: service.marcaModelo,
               precioUnitario: service.precioUnitario,

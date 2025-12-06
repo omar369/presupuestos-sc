@@ -125,8 +125,104 @@ export const ServiciosPrecios: IServicePriceList = {
     'PIAXSCVINPRO': { nombre: 'Star Colors Vinilica Interior Pro Extra-Rugoso - Rango A', precio: 104 },
     'PIBXSCVINPRO': { nombre: 'Star Colors Vinilica Interior Pro Extra-Rugoso - Rango B', precio: 99 },
     'PICXSCVINPRO': { nombre: 'Star Colors Vinilica Interior Pro Extra-Rugoso - Rango C', precio: 94 },
+    //
+    // --- COMEX COMXPRO1 (Original: VINLICA COMEX PRO1000) ---
+    // LISO (Precios P.P.D.)
+    'PEALCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Liso - Rango A', precio: 61 },
+    'PEBLCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Liso - Rango B', precio: 58 },
+    'PECLCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Liso - Rango C', precio: 55 },
+    // RUGOSO (Precios P.P.D.)
+    'PEARCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Rugoso - Rango A', precio: 75 },
+    'PEBRCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Rugoso - Rango B', precio: 71 },
+    'PECRCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Rugoso - Rango C', precio: 68 },
+    // EXTRARUGOSO (Precios P.P.D.)
+    'PEAXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Extra-Rugoso - Rango A', precio: 109 },
+    'PEBXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Extra-Rugoso - Rango B', precio: 99 },
+    'PECXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Exterior Extra-Rugoso - Rango C', precio: 93 },
+
+    // Versión INTERIOR (Mismos precios)
+    'PIALCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Liso - Rango A', precio: 61 },
+    'PIBLCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Liso - Rango B', precio: 58 },
+    'PICLCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Liso - Rango C', precio: 55 },
+    'PIARCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Rugoso - Rango A', precio: 75 },
+    'PIBRCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Rugoso - Rango B', precio: 71 },
+    'PICRCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Rugoso - Rango C', precio: 68 },
+    'PIAXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Extra-Rugoso - Rango A', precio: 109 },
+    'PIBXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Extra-Rugoso - Rango B', precio: 99 },
+    'PICXCOMXPRO1': { nombre: 'Comex Vinlica PRO 1000 Interior Extra-Rugoso - Rango C', precio: 93 },
+
+    //
+    // --- COMEX _ COMXVINIMX (Original: COMEX VINIMEX) ---
+    //
+    // LISO (Precios P.P.D.: 68, 65, 61)
+    'PEALCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Liso - Rango A', precio: 68 },
+    'PEBLCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Liso - Rango B', precio: 65 },
+    'PECLCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Liso - Rango C', precio: 61 },
+    // RUGOSO (Precios P.P.D.: 79, 81, 76)
+    'PEARCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Rugoso - Rango A', precio: 79 },
+    'PEBRCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Rugoso - Rango B', precio: 81 },
+    'PECRCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Rugoso - Rango C', precio: 76 },
+    // EXTRARUGOSO (Precios P.P.D.: 119, 105, 105)
+    'PEAXCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Extra-Rugoso - Rango A', precio: 119 },
+    'PEBXCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Extra-Rugoso - Rango B', precio: 105 },
+    'PECXCOMXVINIMX': { nombre: 'Comex Vinimex Exterior Extra-Rugoso - Rango C', precio: 105 },
+
+    // Versión INTERIOR (Mismos precios)
+    'PIALCOMXVINIMX': { nombre: 'Comex Vinimex Interior Liso - Rango A', precio: 68 },
+    'PIBLCOMXVINIMX': { nombre: 'Comex Vinimex Interior Liso - Rango B', precio: 65 },
+    'PICLCOMXVINIMX': { nombre: 'Comex Vinimex Interior Liso - Rango C', precio: 61 },
+    'PIARCOMXVINIMX': { nombre: 'Comex Vinimex Interior Rugoso - Rango A', precio: 79 },
+    'PIBRCOMXVINIMX': { nombre: 'Comex Vinimex Interior Rugoso - Rango B', precio: 81 },
+    'PICRCOMXVINIMX': { nombre: 'Comex Vinimex Interior Rugoso - Rango C', precio: 76 },
+    'PIAXCOMXVINIMX': { nombre: 'Comex Vinimex Interior Extra-Rugoso - Rango A', precio: 119 },
+    'PIBXCOMXVINIMX': { nombre: 'Comex Vinimex Interior Extra-Rugoso - Rango B', precio: 105 },
+    'PICXCOMXVINIMX': { nombre: 'Comex Vinimex Interior Extra-Rugoso - Rango C', precio: 105 },
+  },
+  EPOXICO: {
+    //
+    // --- COMXEPOXMULTI (Original: EPÓXICO COMEX MULTIPRO) ---
+    //
+    // Superficie S (Precios P.P.D.)
+    'PEASCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie S - Rango A', precio: 272 },
+    'PEBSCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie S - Rango B', precio: 259 },
+    'PECSCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie S - Rango C', precio: 244 },
+    // Superficie M (Precios P.P.D.)
+    'PEAMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie M - Rango A', precio: 355 },
+    'PEBMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie M - Rango B', precio: 338 },
+    'PECMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie M - Rango C', precio: 318 },
+    // Superficie D (Precios P.P.D.)
+    'PEADCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie D - Rango A', precio: 403 },
+    'PEBDCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie D - Rango B', precio: 401 },
+    'PECDCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Exterior Superficie D - Rango C', precio: 411 },
+
+    // Versión INTERIOR (Mismos precios)
+    'PIASCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie S - Rango A', precio: 272 },
+    'PIBSCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie S - Rango B', precio: 259 },
+    'PICSCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie S - Rango C', precio: 244 },
+    'PIAMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie M - Rango A', precio: 355 },
+    'PIBMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie M - Rango B', precio: 338 },
+    'PICMCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie M - Rango C', precio: 318 },
+    'PIADCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie D - Rango A', precio: 403 },
+    'PIBDCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie D - Rango B', precio: 401 },
+    'PICDCOMXEPOXMULTI': { nombre: 'Comex Epóxico Multipro Interior Superficie D - Rango C', precio: 411 },
   },
   IMPERMEABILIZANTE: {
     //..
+  },
+  SELLO: {
+    // LISO (Fila superior de tablas)
+    'SIALSCSR1': { nombre: 'Star Colors Acrisello Liso - Rango A', precio: 29 },
+    'SIBLSCSR1': { nombre: 'Star Colors Acrisello Liso - Rango B', precio: 27 },
+    'SICLSCSR1': { nombre: 'Star Colors Acrisello Liso - Rango C', precio: 26 },
+
+    // RUGOSO (Fila central de tablas)
+    'SIARSCSR1': { nombre: 'Star Colors Acrisello Rugoso - Rango A', precio: 37 },
+    'SIBRSCSR1': { nombre: 'Star Colors Acrisello Rugoso - Rango B', precio: 35 },
+    'SICRSCSR1': { nombre: 'Star Colors Acrisello Rugoso - Rango C', precio: 33 },
+
+    // EXTRARUGOSO (Fila inferior de tablas)
+    'SIAXSCSR1': { nombre: 'Star Colors Acrisello Extra-Rugoso - Rango A', precio: 52 }, // Servicio 100 - 350
+    'SIBXSCSR1': { nombre: 'Star Colors Acrisello Extra-Rugoso - Rango B', precio: 49 }, // Servicio 351 - 600
+    'SICXSCSR1': { nombre: 'Star Colors Acrisello Extra-Rugoso - Rango C', precio: 47 }, // Servicio 601 - 5000
   }
 };
