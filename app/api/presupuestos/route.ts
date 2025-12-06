@@ -7,11 +7,11 @@ import { desc, eq } from "drizzle-orm";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { cliente, direccion, tipoLugar, areas: areasData } = body ?? {};
+    const { cliente, direccion, tipoLugar, areas: areasData, subtotal, impuestos, total } = body ?? {};
 
-    if (!cliente || !direccion || !tipoLugar || !areasData) {
+    if (!cliente || !direccion || !tipoLugar || !areasData || subtotal === undefined || impuestos === undefined || total === undefined) {
       return NextResponse.json(
-        { error: "Faltan campos: cliente, direccion, tipoLugar o áreas" },
+        { error: "Faltan campos requeridos para crear el presupuesto." },
         { status: 400 }
       );
     }
@@ -27,6 +27,9 @@ export async function POST(req: Request) {
 
       const [insertedPresupuesto] = await tx.insert(presupuestos).values({
         clienteId,
+        subtotal,
+        impuestos,
+        total,
       }).returning();
 
       const presupuestoId = insertedPresupuesto.id;
@@ -48,6 +51,8 @@ export async function POST(req: Request) {
               cantidadM2: service.cantidadM2,
               tipoSuperficie: service.tipoSuperficie,
               marcaModelo: service.marcaModelo,
+              precioUnitario: service.precioUnitario,
+              importe: service.importe,
             });
           }
         }
@@ -80,6 +85,7 @@ export async function GET() {
         clienteNombre: clientes.nombre,
         clienteDireccion: clientes.direccion,
         tipoLugar: clientes.tipoLugar,
+        total: presupuestos.total,
       })
       .from(presupuestos)
       .leftJoin(clientes, eq(presupuestos.clienteId, clientes.id))

@@ -58,6 +58,9 @@ export const presupuestos = sqliteTable("presupuestos", {
   clienteId: integer("cliente_id")
     .notNull()
     .references(() => clientes.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  subtotal: real("subtotal").notNull().default(0),
+  impuestos: real("impuestos").notNull().default(0),
+  total: real("total").notNull().default(0),
   // En futuro podríamos añadir: estado, código, notas, etc.
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
@@ -96,6 +99,7 @@ export const areasRelations = relations(areas, ({ one, many }) => ({
     fields: [areas.presupuestoId],
     references: [presupuestos.id],
   }),
+  servicios: many(servicios),
 }));
 
 // Tabla de servicios por área
@@ -108,6 +112,8 @@ export const servicios = sqliteTable("servicios", {
   cantidadM2: real("cantidad_m2").notNull(),
   tipoSuperficie: text("tipo_superficie", { enum: ["LISO", "RUGOSO", "EXTRARUGOSO"] as const }).notNull(),
   marcaModelo: text("marca_modelo").notNull(),
+  precioUnitario: real("precio_unitario").notNull().default(0),
+  importe: real("importe").notNull().default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(nowMs),

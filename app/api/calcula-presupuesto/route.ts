@@ -22,7 +22,9 @@ interface DetailedServiceResult {
 }
 
 interface CalculateQuoteResponse {
-  totalGeneral: number;
+  subtotal: number;
+  impuestos: number;
+  total: number;
   detallesServicios: DetailedServiceResult[];
   error?: string;
 }
@@ -59,7 +61,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let totalGeneral = 0;
+    let subtotal = 0;
     const detallesServicios: DetailedServiceResult[] = [];
 
     for (const service of services) {
@@ -110,7 +112,7 @@ export async function POST(request: Request) {
       }
 
       const costoTotal = serviceInfo.precio * service.cantidadM2;
-      totalGeneral += costoTotal;
+      subtotal += costoTotal;
 
       detallesServicios.push({
         id: service.id,
@@ -122,8 +124,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const impuestos = subtotal * 0.16;
+    const total = subtotal + impuestos;
+
     return NextResponse.json({
-      totalGeneral,
+      subtotal,
+      impuestos,
+      total,
       detallesServicios,
     } as CalculateQuoteResponse);
 

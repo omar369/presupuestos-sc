@@ -1,9 +1,11 @@
 ﻿"use client";
 
 import { useState, FormEvent } from 'react';
-import { Area, Service, AreaForm } from './AreaForm';
+import { quoteSchema } from '@/lib/schemas';
+import type { Area, Service, BudgetData } from '@/lib/types';
+import { AreaForm } from './AreaForm';
 import { ServiceForm } from './ServiceForm';
-import { BudgetForm, type BudgetData } from './BudgetForm';
+import { BudgetForm } from './BudgetForm';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -32,14 +34,18 @@ interface DetailedServiceResult {
 }
 
 interface CalculateQuoteResponse {
-  totalGeneral: number;
+  subtotal: number;
+  impuestos: number;
+  total: number;
   detallesServicios: DetailedServiceResult[];
   error?: string;
 }
 
 export function QuoteForm() {
   const [areas, setAreas] = useState<Area[]>([]);
-  const [totalGeneral, setTotalGeneral] = useState<number | null>(null);
+  const [subtotal, setSubtotal] = useState<number | null>(null);
+  const [impuestos, setImpuestos] = useState<number | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
   const [detailedResults, setDetailedResults] = useState<DetailedServiceResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +99,11 @@ export function QuoteForm() {
       return;
     }
 
+    if (subtotal === null || impuestos === null || total === null) {
+      setError("Por favor, calcule el subtotal antes de guardar.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -100,13 +111,28 @@ export function QuoteForm() {
       ...presupuesto,
       areas: areas.map(area => ({
         ...area,
-        id: undefined, // El ID de frontend no es necesario en el backend
-        services: area.services.map(service => ({
-          ...service,
-          id: undefined, // El ID de frontend no es necesario
-        }))
-      }))
+        services: area.services.map(service => {
+          const result = detailedResults.find(r => r.id === service.id);
+          return {
+            ...service,
+            precioUnitario: result?.precioPorM2 || 0,
+            importe: result?.costoTotal || 0,
+          };
+        })
+      })),
+      subtotal,
+      impuestos,
+      total,
     };
+
+    const validation = quoteSchema.safeParse(payload);
+
+    if (!validation.success) {
+      const errorMessages = validation.error.errors.map(e => e.message).join(' ');
+      setError(`Error de validación: ${errorMessages}`);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/presupuestos', {
@@ -114,7 +140,7 @@ export function QuoteForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(validation.data), // Usamos los datos validados
       });
 
       if (!response.ok) {
@@ -135,7 +161,9 @@ export function QuoteForm() {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setTotalGeneral(null);
+    setSubtotal(null);
+    setImpuestos(null);
+    setTotal(null);
     setDetailedResults([]);
 
     // Transformar la estructura de 'areas' a la que espera la API
@@ -168,7 +196,9 @@ export function QuoteForm() {
       }
 
       const result: CalculateQuoteResponse = await response.json();
-      setTotalGeneral(result.totalGeneral);
+      setSubtotal(result.subtotal);
+      setImpuestos(result.impuestos);
+      setTotal(result.total);
       setDetailedResults(result.detallesServicios);
     } catch (err: any) {
       setError(err.message);
@@ -278,7 +308,7 @@ export function QuoteForm() {
         <p className="text-sm text-red-600 font-medium p-4 bg-destructive/10 rounded-lg">{error}</p>
       )}
 
-      {totalGeneral !== null && (
+      {subtotal !== null && total !== null && impuestos !== null && (
         <div className="mt-6 border border-input rounded-lg bg-secondary p-4 sm:p-5">
           {/* Encabezado con el total */}
           <div className='flex justify-between items-start mb-6'>
@@ -286,9 +316,19 @@ export function QuoteForm() {
               <h3 className="text-lg font-semibold">Resultados del Presupuesto</h3>
               <p className="text-xs text-muted-foreground">Desglose de los servicios cotizados.</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Total General</p>
-              <p className="text-2xl font-bold">${totalGeneral.toFixed(2)}</p>
+            <div className="text-right space-y-2">
+              <div>
+                <p className="text-sm text-muted-foreground">Subtotal</p>
+                <p className="text-lg font-semibold">${subtotal.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Impuestos (16%)</p>
+                <p className="text-lg font-semibold">${impuestos.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">${total.toFixed(2)}</p>
+              </div>
             </div>
           </div>
 
