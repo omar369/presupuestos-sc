@@ -2,6 +2,71 @@ import { db } from "@/db";
 import { notFound } from "next/navigation";
 import { PresupuestoView } from "@/components/presupuestos/PresupuestoView";
 import { AlertTriangle, ServerCrash } from "lucide-react";
+import { ServiciosPrecios } from "@/lib/lista_precios_servicio";
+import { MarcasModelos } from "@/lib/lista_marcas_modelos";
+import { Servicio } from "@/db/schema"; // Importar el tipo Servicio de Drizzle
+
+// Función para obtener la descripción legible del servicio
+function getServiceDescription(service: Servicio): string {
+  const { tipoServicio, tipoSuperficie, marcaModelo, unidadDeMedida } = service;
+
+  const tipoProducto = tipoServicio.toLowerCase(); // 'pintura'
+
+  // Mapear el tipo de superficie
+  let superficieAcabado: string;
+  if (tipoSuperficie === 'LISO') superficieAcabado = 'acabado liso';
+  else if (tipoSuperficie === 'RUGOSO') superficieAcabado = 'acabado rugoso';
+  else superficieAcabado = 'acabado extra rugoso'; // EXTRARUGOSO
+
+  // Buscar el nombre de la marca/modelo
+  const marcaModeloDetalle = MarcasModelos.find(m => m.value === marcaModelo);
+  const nombreMarcaModelo = marcaModeloDetalle ? marcaModeloDetalle.label : marcaModelo;
+
+  // Determinar el tipo de pintura/producto para la descripción
+  let tipoDeProductoDescriptivo: string;
+  let marcaModeloConTipo: string = nombreMarcaModelo;
+
+  if (tipoProducto === 'pintura') {
+    if (nombreMarcaModelo.includes('Vinilica')) {
+      tipoDeProductoDescriptivo = 'pintura vinílica';
+    } else if (nombreMarcaModelo.includes('Esmalte')) {
+      tipoDeProductoDescriptivo = 'pintura de esmalte';
+      marcaModeloConTipo = `marca ${nombreMarcaModelo}`;
+    } else {
+      tipoDeProductoDescriptivo = 'pintura';
+    }
+  } else if (tipoProducto === 'esmalte') {
+    tipoDeProductoDescriptivo = 'pintura de esmalte';
+    marcaModeloConTipo = `marca ${nombreMarcaModelo}`;
+  } else if (tipoProducto === 'epoxico') {
+    tipoDeProductoDescriptivo = 'pintura epóxica';
+    marcaModeloConTipo = `marca ${nombreMarcaModelo}`;
+  } else if (tipoProducto === 'sello') {
+    tipoDeProductoDescriptivo = 'sellador acrílico';
+  } else {
+    tipoDeProductoDescriptivo = tipoProducto; // Fallback
+  }
+
+  // Intentar extraer la ubicación de la clave de servicio si es posible
+  // Esto es un poco más complejo ya que la clave no está disponible directamente aquí.
+  // Podríamos inferirlo de la `area.ubicacion` pero `service` no tiene `area.ubicacion` directamente.
+  // Por ahora, asumiremos que la ubicación se puede deducir o no es crítica para esta descripción.
+  // O mejor, obtengamos la ubicación desde la clave si es que la clave se generó correctamente con ella.
+  // Para este punto, el `service` objeto proviene de la DB y no contiene la ubicacion del área
+  // por lo que no podemos inferir "para interior" o "para exterior" fácilmente aquí sin más datos.
+  // Dejaré la ubicación como "N/A" o omitida por ahora, o buscaré una forma de pasarla.
+
+  // Como la clave completa se genera en el frontend y en la API de cálculo, pero no está en el objeto 'Servicio' de la DB,
+  // Necesitamos adaptar la descripción sin la ubicación.
+
+  // Re-evaluando la descripción del usuario:
+  // "Servicio de aplicación de (y ahí tomas el tipo de producto: pintura),
+  // (luego el tipo de pintura), (luego marca modelo),
+  // luego mencionas el tipo de superficie (acabado liso, rugoso o Ex rug.
+
+  // Nueva Construcción simplificada sin ubicación (ya que no la tenemos en el objeto 'servicio' de la DB directamente)
+  return `Servicio de aplicación de ${tipoDeProductoDescriptivo} ${marcaModeloConTipo} en superficie con ${superficieAcabado}.`;
+}
 
 type PresupuestoPageProps = {
   params: {
@@ -68,7 +133,19 @@ export default async function PresupuestoPage({ params }: PresupuestoPageProps) 
     );
   }
 
-  // 4. Renderizado del componente de cliente
+  // 4. Enriquecer el objeto budget con el nombre descriptivo del servicio
+  const enrichedBudget = {
+    ...budget,
+    areas: budget.areas.map(area => ({
+      ...area,
+      servicios: area.servicios.map(service => ({
+        ...service,
+        nombre: getServiceDescription(service), // Agregamos el nombre descriptivo
+      })),
+    })),
+  };
+
+  // 5. Renderizado del componente de cliente
   // @ts-ignore - Se usa porque el tipo anidado de Drizzle es complejo, pero estructuralmente compatible.
-  return <PresupuestoView budget={budget} />;
+  return <PresupuestoView budget={enrichedBudget} />;
 }

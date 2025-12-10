@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Esquema para un solo servicio
 export const serviceSchema = z.object({
   // El ID no se valida porque se genera en el frontend
-  tipoServicio: z.enum(['PINTURA'], {
+  tipoServicio: z.enum(['PINTURA', 'ESMALTE', 'EPOXICO', 'SELLO', 'OTROS'], {
     message: 'El tipo de servicio es obligatorio.',
   }),
   unidadDeMedida: z.enum(['m2', 'ml'], {
@@ -19,7 +19,7 @@ export const serviceSchema = z.object({
       message: 'La cantidad debe ser mayor a 0.',
     }),
 
-  tipoSuperficie: z.enum(['LISO', 'RUGOSO', 'EXTRARUGOSO'], {
+  tipoSuperficie: z.enum(['LISO', 'RUGOSO', 'EXTRARUGOSO', 'SENCILLO', 'MEDIO', 'DIFICIL'], {
     message: 'El tipo de superficie es obligatorio.',
   }),
   marcaModelo: z
@@ -76,7 +76,7 @@ export const budgetSchema = z.object({
     .min(1, 'La dirección es obligatoria.')
     .regex(/^[a-zA-Z0-9 .,-]+$/, 'Solo se permiten letras, números, espacios, puntos, comas y guiones.'),
   tipoLugar: z.enum(
-    ['CASA', 'DEPARTAMENTO', 'BODEGA', 'LOCAL', 'OFICINA', 'OTRO'],
+    ['CASA', 'DEPARTAMENTO', 'BODEGA', 'LOCAL', 'OFICINA', 'OTROS'],
     {
       message: 'El tipo de lugar es obligatorio.',
     }

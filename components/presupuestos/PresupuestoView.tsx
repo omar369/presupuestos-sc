@@ -10,7 +10,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import PdfPresupuesto from "./PdfPresupuesto"; // Asegúrate que la ruta es correcta
 
 // Extendemos los tipos para incluir las relaciones que vienen de la consulta
-type ServicioConPrecio = Servicio & { precioUnitario: number; importe: number };
+type ServicioConPrecio = Servicio & { precioUnitario: number; importe: number; nombre: string; };
 type AreaConServicios = Area & { servicios: ServicioConPrecio[] };
 type PresupuestoCompleto = Presupuesto & {
   cliente: Cliente | null;
@@ -33,7 +33,7 @@ export function PresupuestoView({ budget }: PresupuestoViewProps) {
   // Preparamos los datos para el componente PDF
   const presupuestoDataForPdf = {
     id: budget.id,
-    createdAt: budget.createdAt,
+    createdAt: budget.createdAt.toISOString(),
     clienteNombre: budget.cliente?.nombre || 'N/A',
     clienteDireccion: budget.cliente?.direccion || 'N/A',
     subtotal: budget.subtotal,
@@ -49,6 +49,7 @@ export function PresupuestoView({ budget }: PresupuestoViewProps) {
         marcaModelo: s.marcaModelo,
         precioUnitario: s.precioUnitario,
         importe: s.importe,
+        nombre: s.nombre,
       })),
     })),
   };
@@ -127,8 +128,7 @@ export function PresupuestoView({ budget }: PresupuestoViewProps) {
                       {area.servicios.map(service => ( // Corregido de 'services'
                         <tr key={service.id}>
                           <td className="p-2">
-                            <p className="font-medium">{service.tipoServicio} {service.tipoSuperficie}</p>
-                            <p className="text-xs text-muted-foreground">{service.marcaModelo}</p>
+                            <p className="font-medium">{service.nombre}</p>
                           </td>
                           <td className="p-2 text-right">{service.cantidadM2.toFixed(2)} {service.unidadDeMedida}</td>
                           <td className="p-2 text-right">${service.precioUnitario.toFixed(2)}</td>

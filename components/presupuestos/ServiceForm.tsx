@@ -39,12 +39,12 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
     defaultValues: {
       tipoServicio: 'PINTURA',
       unidadDeMedida: 'm2', // Valor por defecto
-      cantidadM2: '0', 
+      cantidadM2: '0',
       tipoSuperficie: 'LISO',
       marcaModelo: MarcasModelos[0].value,
     },
   });
-  
+
   const marcaModeloValue = useWatch({
     control,
     name: 'marcaModelo',
@@ -71,6 +71,10 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="PINTURA">PINTURA</SelectItem>
+              <SelectItem value="ESMALTE">ESMALTE</SelectItem>
+              <SelectItem value="EPOXICO">EPÓXICO</SelectItem>
+              <SelectItem value="SELLO">SELLO</SelectItem>
+              <SelectItem value="OTROS">OTROS</SelectItem>
             </SelectContent>
           </Select>
           {errors.tipoServicio && (
@@ -98,8 +102,8 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
         <div className="space-y-1.5">
           <Label htmlFor="service-unidad">Unidad</Label>
           <Select
-             defaultValue={control._defaultValues.unidadDeMedida}
-             onValueChange={(value) => setValue('unidadDeMedida', value as 'm2' | 'ml')}
+            defaultValue={control._defaultValues.unidadDeMedida}
+            onValueChange={(value) => setValue('unidadDeMedida', value as 'm2' | 'ml')}
           >
             <SelectTrigger id="service-unidad" className="border-input">
               <SelectValue placeholder="Selecciona unidad" />
@@ -119,7 +123,7 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
           <Label htmlFor="service-superficie">Tipo de Superficie</Label>
           <Select
             defaultValue={control._defaultValues.tipoSuperficie}
-             onValueChange={(value) => setValue('tipoSuperficie', value as 'LISO' | 'RUGOSO' | 'EXTRARUGOSO')}
+            onValueChange={(value) => setValue('tipoSuperficie', value as 'LISO' | 'RUGOSO' | 'EXTRARUGOSO')}
           >
             <SelectTrigger id="service-superficie" className="border-input">
               <SelectValue placeholder="Selecciona superficie" />
@@ -128,6 +132,9 @@ export function ServiceForm({ onSubmit, onClose }: ServiceFormProps) {
               <SelectItem value="LISO">LISO</SelectItem>
               <SelectItem value="RUGOSO">RUGOSO</SelectItem>
               <SelectItem value="EXTRARUGOSO">EXTRARUGOSO</SelectItem>
+              <SelectItem value="SENCILLO">SENCILLO</SelectItem>
+              <SelectItem value="MEDIO">MEDIO</SelectItem>
+              <SelectItem value="DIFICIL">DIFICIL</SelectItem>
             </SelectContent>
           </Select>
           {errors.tipoSuperficie && (

@@ -6,7 +6,7 @@ export type TipoLugar =
   | "BODEGA"
   | "LOCAL"
   | "OFICINA"
-  | "OTRO";
+  | "OTROS";
 
 export interface BudgetData {
   cliente: string;
@@ -16,10 +16,10 @@ export interface BudgetData {
 
 export interface Service {
   id: string;
-  tipoServicio: 'PINTURA';
+  tipoServicio: 'PINTURA' | 'ESMALTE' | 'SELLO' | 'EPOXICO' | 'OTROS';
   unidadDeMedida: 'm2' | 'ml';
   cantidadM2: string;
-  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
+  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO' | 'SENCILLO' | 'MEDIO' | 'DIFICIL';
   marcaModelo: string;
 }
 

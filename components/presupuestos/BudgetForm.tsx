@@ -60,7 +60,7 @@ export function BudgetForm({ onCreate }: { onCreate: (data: FormBudgetData) => v
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="bf-tipo">Tipo de lugar</Label>
-           {/* @ts-ignore */}
+          {/* @ts-ignore */}
           <Select
             defaultValue={control._defaultValues.tipoLugar}
             onValueChange={(value) => setValue("tipoLugar", value as any)}
@@ -74,7 +74,7 @@ export function BudgetForm({ onCreate }: { onCreate: (data: FormBudgetData) => v
               <SelectItem value="BODEGA">Bodega</SelectItem>
               <SelectItem value="LOCAL">Local</SelectItem>
               <SelectItem value="OFICINA">Oficina</SelectItem>
-              <SelectItem value="OTRO">Otro</SelectItem>
+              <SelectItem value="OTROS">Otros</SelectItem>
             </SelectContent>
           </Select>
           {errors.tipoLugar && <p className="text-sm text-red-600">{errors.tipoLugar.message}</p>}

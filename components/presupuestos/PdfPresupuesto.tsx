@@ -10,6 +10,7 @@ interface ServicioPdf {
   marcaModelo: string;
   precioUnitario: number;
   importe: number;
+  nombre: string; // Nuevo campo para la descripción descriptiva
 }
 
 interface AreaPdf {
@@ -120,7 +121,7 @@ const PdfPresupuesto = ({ presupuesto }: { presupuesto: PresupuestoCompleto }) =
               <View style={styles.tableRow} key={index}>
                 <Text style={[styles.tableCell, styles.colCantidad]}>{`${servicio.cantidadM2} ${servicio.unidadDeMedida}`}</Text>
                 <Text style={[styles.tableCell, styles.colClave]}>{servicio.marcaModelo}</Text>
-                <Text style={[styles.tableCell, styles.colDescripcion]}>{`Servicio de ${servicio.tipoServicio} en superficie ${servicio.tipoSuperficie}`}</Text>
+                <Text style={[styles.tableCell, styles.colDescripcion]}>{servicio.nombre}</Text>
                 <Text style={[styles.tableCell, styles.colPU]}>{formatCurrency(servicio.precioUnitario)}</Text>
                 <Text style={[styles.tableCell, styles.colImporte]}>{formatCurrency(servicio.importe)}</Text>
               </View>

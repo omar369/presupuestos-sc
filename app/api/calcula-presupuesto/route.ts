@@ -4,11 +4,11 @@ import { ServiciosPrecios, getRangoM2Key } from '@/lib/lista_precios_servicio';
 interface ServiceInput {
   id: string;
   areaName?: string;
-  tipoServicio: 'PINTURA';
+  tipoServicio: 'PINTURA' | 'ESMALTE' | 'EPOXICO' | 'SELLO' | 'OTROS';
   ubicacion: 'INTERIOR' | 'EXTERIOR';
   cantidadM2: string; // Acepta string desde el frontend
   unidadDeMedida: 'm2' | 'ml';
-  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
+  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO' | 'SENCILLO' | 'MEDIO' | 'RUGOSO';
   marcaModelo: string;
 }
 
@@ -17,7 +17,7 @@ interface DetailedServiceResult {
   areaName?: string;
   claveGenerada: string;
   precioPorM2: number;
-  cantidadM2: number; // Devuelve número
+  cantidadM2: number;
   costoTotal: number;
   error?: string;
 }
@@ -31,11 +31,11 @@ interface CalculateQuoteResponse {
 }
 
 function buildClaveDeServicio(params: {
-  tipoServicio: 'PINTURA';
+  tipoServicio: 'PINTURA' | 'ESMALTE' | 'EPOXICO' | 'SELLO' | 'OTROS';
   ubicacion: 'INTERIOR' | 'EXTERIOR';
   cantidadM2: number; // Espera número para el cálculo
   unidadDeMedida: 'm2' | 'ml';
-  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO';
+  tipoSuperficie: 'LISO' | 'RUGOSO' | 'EXTRARUGOSO' | 'SENCILLO' | 'MEDIO' | 'DIFICIL';
   marcaModelo: string;
 }): string {
   const { tipoServicio, ubicacion, cantidadM2, tipoSuperficie, marcaModelo, unidadDeMedida } = params;
@@ -50,10 +50,13 @@ function buildClaveDeServicio(params: {
   if (tipoSuperficie === 'LISO') tsuf = 'L';
   else if (tipoSuperficie === 'RUGOSO') tsuf = 'R';
   else if (tipoSuperficie === 'EXTRARUGOSO') tsuf = 'X';
-  else tsuf = 'X';
+  else if (tipoSuperficie === 'SENCILLO') tsuf = 'S';
+  else if (tipoSuperficie === 'MEDIO') tsuf = 'M';
+  else if (tipoSuperficie === 'DIFICIL') tsuf = 'D';
+  else tsuf = 'ERR';
 
   const mm = marcaModelo;
-  
+
   // Se añade la unidad de medida a la clave para diferenciar precios si es necesario en el futuro
   const um = unidadDeMedida.toUpperCase();
 
@@ -91,7 +94,7 @@ export async function POST(request: Request) {
         });
         continue;
       }
-      
+
       const claveGenerada = buildClaveDeServicio({ ...service, cantidadM2: cantidadM2Num });
 
       // Buscar el precio en nuestra "base de datos" en memoria
