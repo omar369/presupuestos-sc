@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// Esquema para un solo servicio
+// ESQUEMA DE SERVICIO 
 export const serviceSchema = z.object({
   // El ID no se valida porque se genera en el frontend
   tipoServicio: z.enum(['PINTURA', 'ESMALTE', 'EPOXICO', 'SELLO', 'OTROS'], {
