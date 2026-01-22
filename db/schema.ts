@@ -4,6 +4,8 @@ import {
   real,
   sqliteTable,
   text,
+  SQLiteTimestamp,
+  index,
 } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
@@ -79,56 +81,89 @@ export const presupuestosRelations = relations(presupuestos, ({ one, many }) => 
 }));
 
 // Tabla de áreas que pertenecen a un presupuesto
-export const areas = sqliteTable("areas", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  presupuestoId: integer("presupuesto_id")
-    .notNull()
-    .references(() => presupuestos.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  nombre: text("nombre").notNull(),
-  ubicacion: text("ubicacion", { enum: ["INTERIOR", "EXTERIOR"] as const }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(nowMs),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(nowMs),
-});
+// export const areas = sqliteTable("areas", {
+//   id: integer("id").primaryKey({ autoIncrement: true }),
+//   presupuestoId: integer("presupuesto_id")
+//     .notNull()
+//     .references(() => presupuestos.id, { onDelete: "cascade", onUpdate: "cascade" }),
+//   nombre: text("nombre").notNull(),
+//   ubicacion: text("ubicacion", { enum: ["INTERIOR", "EXTERIOR"] as const }).notNull(),
+//   createdAt: integer("created_at", { mode: "timestamp_ms" })
+//     .notNull()
+//     .default(nowMs),
+//   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+//     .notNull()
+//     .default(nowMs),
+// });
 
-export const areasRelations = relations(areas, ({ one, many }) => ({
-  presupuesto: one(presupuestos, {
-    fields: [areas.presupuestoId],
-    references: [presupuestos.id],
-  }),
-  servicios: many(servicios),
-}));
+// export const areasRelations = relations(areas, ({ one, many }) => ({
+//   presupuesto: one(presupuestos, {
+//     fields: [areas.presupuestoId],
+//     references: [presupuestos.id],
+//   }),
+//   servicios: many(servicios),
+// }));
 
-// Tabla de servicios por área
-export const servicios = sqliteTable("servicios", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  areaId: integer("area_id")
-    .notNull()
-    .references(() => areas.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  tipoServicio: text("tipo_servicio", { enum: ["PINTURA"] as const }).notNull(),
-  unidadDeMedida: text("unidad_de_medida", { enum: ["m2", "ml"] as const }).notNull().default("m2"),
-  cantidadM2: real("cantidad_m2").notNull(),
-  tipoSuperficie: text("tipo_superficie", { enum: ["LISO", "RUGOSO", "EXTRARUGOSO"] as const }).notNull(),
-  marcaModelo: text("marca_modelo").notNull(),
-  precioUnitario: real("precio_unitario").notNull().default(0),
-  importe: real("importe").notNull().default(0),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(nowMs),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(nowMs),
-});
+// // Tabla de servicios por área
+// export const servicios = sqliteTable("servicios", {
+//   id: integer("id").primaryKey({ autoIncrement: true }),
+//   areaId: integer("area_id")
+//     .notNull()
+//     .references(() => areas.id, { onDelete: "cascade", onUpdate: "cascade" }),
+//   tipoServicio: text("tipo_servicio", { enum: ["PINTURA"] as const }).notNull(),
+//   unidadDeMedida: text("unidad_de_medida", { enum: ["m2", "ml"] as const }).notNull().default("m2"),
+//   cantidadM2: real("cantidad_m2").notNull(),
+//   tipoSuperficie: text("tipo_superficie", { enum: ["LISO", "RUGOSO", "EXTRARUGOSO"] as const }).notNull(),
+//   marcaModelo: text("marca_modelo").notNull(),
+//   precioUnitario: real("precio_unitario").notNull().default(0),
+//   importe: real("importe").notNull().default(0),
+//   createdAt: integer("created_at", { mode: "timestamp_ms" })
+//     .notNull()
+//     .default(nowMs),
+//   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+//     .notNull()
+//     .default(nowMs),
+// });
 
-export const serviciosRelations = relations(servicios, ({ one }) => ({
-  area: one(areas, {
-    fields: [servicios.areaId],
-    references: [areas.id],
-  }),
-}));
+// export const serviciosRelations = relations(servicios, ({ one }) => ({
+//   area: one(areas, {
+//     fields: [servicios.areaId],
+//     references: [areas.id],
+//   }),
+// }));
+
+export const areas = sqliteTable('areas', {
+  id: text('id').primaryKey(),
+  trabajo_id: text('trabajo_id').notNull().references(() => trabajos.id, { onDelete: 'cascade' }),
+  nombre: text('nombre').notNull(),
+  notas: text('notas').notNull().default(''),
+  ubicacion: text('ubicacion', { enum: ['INTERIOR', 'EXTERIOR'] }).notNull(),
+  created_at: text('created_at').notNull(),
+  updated_at: text('updated_at').notNull(),
+})
+
+export const servicios = sqliteTable('servicios', {
+  id: text('id').primaryKey(),
+  trabajo_id: text('trabajo_id').notNull().references(() => trabajos.id, { onDelete: 'cascade' }),
+  area_id: text('area_id').notNull().references(() => areas.id, { onDelete: 'cascade' }),
+  tipo_servicio: text('tipo_servicio', { enum: ['PINTURA', 'ESMALTE', 'SELLO', 'EPOXICO', 'OTROS'] }).notNull(),
+  unidad: text('unidad', { enum: ['M2', 'ML'] }).notNull(),
+  cantidad: text('cantidad').notNull(), // guardamos como texto para evitar float issues; luego parseas a number
+  producto_marca: text('producto_marca').notNull().default(''),
+  producto_modelo: text('producto_modelo').notNull().default(''),
+  created_at: text('created_at').notNull(),
+  updated_at: text('updated_at').notNull(),
+})
+
+export const croquisItems = sqliteTable('croquis_items', {
+  id: text('id').primaryKey(),
+  croquis_id: text('croquis_id').notNull().references(() => croquis.id, { onDelete: 'cascade' }),
+  shape_id: text('shape_id').notNull(), // id de la figura en tu doc.entities
+  area_id: text('area_id').notNull().references(() => areas.id, { onDelete: 'cascade' }),
+  servicio_id: text('servicio_id').notNull().references(() => servicios.id, { onDelete: 'cascade' }),
+  created_at: text('created_at').notNull(),
+  updated_at: text('updated_at').notNull(),
+})
 
 // Tipos inferidos útiles
 export type Cliente = typeof clientes.$inferSelect;
@@ -143,3 +178,45 @@ export type NewArea = typeof areas.$inferInsert;
 export type Servicio = typeof servicios.$inferSelect;
 export type NewServicio = typeof servicios.$inferInsert;
 
+
+// Trabajos (objeto padre)
+export const trabajos = sqliteTable('trabajos', {
+  id: text('id').primaryKey(),
+
+  titulo: text('titulo').notNull(),
+  descripcion: text('descripcion'),
+
+  clienteNombre: text('cliente_nombre'),
+  encargadoNombre: text('encargado_nombre'),
+
+  direccion: text('direccion'),
+  contacto: text('contacto'),
+
+  startDate: text('start_date'),
+  endDate: text('end_date'),
+
+  status: text('status').notNull().default('BORRADOR'),
+
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+})
+
+export const croquis = sqliteTable(
+  "croquis",
+  {
+    id: text("id").primaryKey(),
+    trabajoId: text("trabajo_id")
+      .notNull()
+      .references(() => trabajos.id, { onDelete: "cascade" }),
+
+    name: text("name").notNull(),
+    docVersion: text("doc_version").notNull(),
+    payloadJson: text("payload_json").notNull(),
+
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => ({
+    trabajoIdIdx: index("croquis_trabajo_id_idx").on(t.trabajoId),
+  })
+);

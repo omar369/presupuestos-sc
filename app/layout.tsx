@@ -18,9 +18,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Metadata remains, but can't be exported from a "use client" component in the same way.
-// Next.js will handle this. For this case, we can remove it as it's the default one.
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,7 +35,7 @@ export default function RootLayout({
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
-          <div className="flex-1 md:ml-64">
+          <div className="flex-1 md:ml-2">
             <header className="p-4 md:hidden">
               <Button
                 variant="ghost"

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { X, Menu } from "lucide-react";
 import React from "react";
 
 function NavItem({
@@ -44,6 +44,7 @@ interface SidebarProps {
 
 export function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   const handleNavItemClick = () => {
     if (window.innerWidth < 768) {
@@ -61,19 +62,44 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-20 w-64 shrink-0 transform border-r border-black bg-secondary p-4 transition-transform duration-300 ease-in-out md:relative md:translate-x-0",
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-20 shrink-0 transform border-r border-black bg-secondary p-4 transition-all duration-300 ease-in-out md:relative md:translate-x-0",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+        isCollapsed ? "md:w-16" : "md:w-64"
       )}
+      style={{
+        width: isSidebarOpen ? (isCollapsed ? "64px" : "256px") : undefined,
+      }}
     >
       <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg sm:text-xl font-semibold">Panel</h1>
-          <p className="text-sm text-muted-foreground">Inicio (dashboard)</p>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Hamburger button - only visible on desktop */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:flex shrink-0 h-8 w-8"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">
+              {isCollapsed ? "Expandir menú" : "Colapsar menú"}
+            </span>
+          </Button>
+
+          {/* Title - hidden when collapsed */}
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold">Panel</h1>
+              <p className="text-sm text-muted-foreground">Inicio (dashboard)</p>
+            </div>
+          )}
         </div>
+
+        {/* Close button - only visible on mobile */}
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="md:hidden shrink-0"
           onClick={() => setIsSidebarOpen(false)}
         >
           <X className="h-6 w-6" />
@@ -81,53 +107,56 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
         </Button>
       </div>
 
-      <nav className="space-y-1">
-        <div className="mb-2">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-            Herramientas
-          </p>
-          <NavItem href="/" label="Inicio" exact onClick={handleNavItemClick} />
-          <div className="mt-1 space-y-1">
-            <NavItem
-              href="/herramientas/agenda"
-              label="Agenda"
-              onClick={handleNavItemClick}
-            />
-            <NavItem
-              href="/herramientas/documentacion"
-              label="Documentación"
-              onClick={handleNavItemClick}
-            />
-            <NavItem
-              href="/herramientas/sobre-la-app"
-              label="Sobre la app"
-              onClick={handleNavItemClick}
-            />
+      {/* Navigation - hidden when collapsed */}
+      {!isCollapsed && (
+        <nav className="space-y-1">
+          <div className="mb-2">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+              Herramientas
+            </p>
+            <NavItem href="/" label="Inicio" exact onClick={handleNavItemClick} />
+            <div className="mt-1 space-y-1">
+              <NavItem
+                href="/herramientas/agenda"
+                label="Agenda"
+                onClick={handleNavItemClick}
+              />
+              <NavItem
+                href="/herramientas/documentacion"
+                label="Documentación"
+                onClick={handleNavItemClick}
+              />
+              <NavItem
+                href="/herramientas/sobre-la-app"
+                label="Sobre la app"
+                onClick={handleNavItemClick}
+              />
+              <NavItem
+                href="/herramientas/trabajos"
+                label="Trabajos"
+                onClick={handleNavItemClick}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="h-px bg-black/70 my-3" />
+          <div className="h-px bg-black/70 my-3" />
 
-        <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-            Presupuestos
-          </p>
-          <div className="space-y-1">
-            <NavItem
-              href="/presupuestos/nuevo"
-              label="Nuevo"
-              onClick={handleNavItemClick}
-            />
-            <NavItem
-              href="/presupuestos"
-              label="Historial"
-              exact={false}
-              onClick={handleNavItemClick}
-            />
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+              Presupuestos
+            </p>
+            <div className="space-y-1">
+              <NavItem
+                href="/presupuestos/nuevo"
+                label="Nuevo"
+                onClick={handleNavItemClick}
+              />
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
     </aside>
   );
 }
+
 

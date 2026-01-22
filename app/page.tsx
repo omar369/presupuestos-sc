@@ -23,6 +23,7 @@ export default function Home() {
           <p className="text-sm text-muted-foreground">Aprobados (semana)</p>
           <p className="text-3xl font-bold">8</p>
         </div>
+
       </section>
 
       {/* Pending + agenda preview */}
@@ -53,6 +54,7 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
     </main>
   );
 }

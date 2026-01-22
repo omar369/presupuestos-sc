@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1769019583206,
+      "tag": "0000_shiny_the_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769036385644,
+      "tag": "0001_optimal_winter_soldier",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769053416579,
+      "tag": "0002_lethal_butterfly",
+      "breakpoints": true
+    }
+  ]
+}
