@@ -46,7 +46,7 @@ export default function UploadBackground({ dark }: { dark?: boolean }) {
                     }
                 `}
             >
-                {loading ? 'Subiendo…' : 'Subir plano (PNG/JPG/SVG)'}
+                {loading ? 'Subiendo…' : 'cargar plano'}
             </button>
 
             <input

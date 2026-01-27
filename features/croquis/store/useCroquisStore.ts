@@ -66,6 +66,10 @@ type CroquisState = {
 
   refreshAreas: () => Promise<void>
 
+  viewport: { x: number; y: number; scale: number }
+  setViewport: (patch: Partial<CroquisState['viewport']>) => void
+  resetViewport: () => void
+
 }
 
 // CREATE STATE DEL CROQUIS
@@ -288,6 +292,10 @@ export const useCroquisStore = create<CroquisState>((set, get) => ({
     const a = await r.json()
     set({ areas: a.areas ?? [] })
   },
+
+  viewport: { x: 0, y: 0, scale: 1 },
+  setViewport: (patch) => set((s) => ({ viewport: { ...s.viewport, ...patch } })),
+  resetViewport: () => set({ viewport: { x: 0, y: 0, scale: 1 } }),
 
 }))
 

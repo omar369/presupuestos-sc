@@ -67,7 +67,7 @@ export default function Planos({ croquisId, croquisName }: { croquisId: string, 
       {/* Bottom Panel (Dark Theme) */}
       <section
         style={{
-          height: '340px',
+          height: '240px',
           padding: '20px',
           backgroundColor: '#0f172a', // Gris muy oscuro con toque de azul (Slate 900)
           display: 'flex',

@@ -50,8 +50,6 @@ export default function InspectorPanel() {
   const updateShapeMeta = useCroquisStore((s) => s.updateShapeMeta)
   const deleteSelected = useCroquisStore((s) => s.deleteSelected)
   const duplicateSelected = useCroquisStore((s) => s.duplicateSelected)
-  const insertPolyNode = useCroquisStore((s) => s.insertPolyNode)
-  const removePolyNode = useCroquisStore((s) => s.removePolyNode)
   const areas = useCroquisStore((s) => s.areas)
 
   const sh = selectedId ? (doc.entities as any)[selectedId] : null
@@ -80,9 +78,6 @@ export default function InspectorPanel() {
   )
 
   const isLine = sh.type === 'line' || sh.type === 'svgPolyline'
-  const isRect = sh.type === 'rect' || sh.type === 'svgRect'
-  const isCircle = sh.type === 'circle' || sh.type === 'svgCircle'
-  const isPoly = sh.type === 'poly' || sh.type === 'svgPoly'
 
   const service = ensureService(sh.meta)
 
@@ -138,37 +133,6 @@ export default function InspectorPanel() {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      {/* Geometría + Estilos + Metadata */}
-      <div className="grid grid-cols-12 gap-2">
-        {isPoly && (
-          <>
-            <div className="col-span-4 text-[10px] text-slate-400 self-end">
-              Vértices: <b className="text-white">{sh.points.length / 2}</b>
-            </div>
-            <div className="col-span-8 flex gap-2 flex-wrap">
-              <button onClick={() => insertPolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-white text-xs font-bold hover:bg-slate-700 transition-colors">
-                + Nodo
-              </button>
-              <button onClick={() => removePolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-white text-xs font-bold hover:bg-slate-700 transition-colors">
-                - Nodo
-              </button>
-            </div>
-          </>
-        )}
-
-        {!isLine && (
-          <label className="col-span-3 flex flex-col gap-1 text-xs">
-            <span className="opacity-80">Fill</span>
-            <input
-              type="color"
-              value={sh.style.fill || '#000000'}
-              onChange={(e) => updateShapeStyle(sh.id, { fill: e.target.value })}
-              className="h-9 w-full rounded-lg border border-slate-700 bg-slate-800"
-            />
-          </label>
-        )}
       </div>
 
       {/* ✅ SERVICIOS (bloqueado si no hay área) */}
@@ -318,6 +282,6 @@ export default function InspectorPanel() {
           Eliminar
         </button>
       </div>
-    </div>
+    </div >
   )
 }

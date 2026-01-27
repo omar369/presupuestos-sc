@@ -28,6 +28,9 @@ export default function CanvasStage() {
   const { ref, size } = useContainerSize()
   const trRef = useRef<any>(null)
   const nodeRef = useRef<any>(null)
+  const stageRef = useRef<any>(null)
+  const isPanning = useRef(false)
+  const [spacePressed, setSpacePressed] = useState(false)
 
   const svgRoot = useCroquisStore((s: any) => s.svgRoot)
   const setSvgRoot = useCroquisStore((s: any) => s.setSvgRoot)
@@ -54,6 +57,9 @@ export default function CanvasStage() {
   const commitDraft = useCroquisStore((s) => s.commitDraft)
   const updateShape = useCroquisStore((s) => s.updateShape)
 
+  const viewport = useCroquisStore((s) => s.viewport)
+  const setViewport = useCroquisStore((s) => s.setViewport)
+
   const startPt = useRef<{ x: number; y: number } | null>(null)
 
   const selectedShape = useMemo(
@@ -75,10 +81,16 @@ export default function CanvasStage() {
     }
   }, [selectedShape])
 
+  // Transform pointer position based on viewport
   const getPointer = (e: any) => {
     const stage = e.target.getStage()
     const p = stage.getPointerPosition()
-    return { x: p?.x ?? 0, y: p?.y ?? 0 }
+    if (!p) return { x: 0, y: 0 }
+    // Transform screen coordinates to canvas coordinates
+    return {
+      x: (p.x - viewport.x) / viewport.scale,
+      y: (p.y - viewport.y) / viewport.scale,
+    }
   }
 
   const bgFit = useMemo(() => {
@@ -144,10 +156,88 @@ export default function CanvasStage() {
   }
 
   const onUp = () => {
+    if (isPanning.current) {
+      isPanning.current = false
+      return
+    }
     if (!draft) return
     startPt.current = null
     commitDraft()
   }
+
+  // Handle zoom with mouse wheel
+  const handleWheel = (e: any) => {
+    e.evt.preventDefault()
+
+    const stage = stageRef.current
+    if (!stage) return
+
+    const pointer = stage.getPointerPosition()
+    if (!pointer) return
+
+    const scaleBy = 1.1
+    const oldScale = viewport.scale
+    const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy
+
+    // Clamp scale
+    const clampedScale = Math.max(0.1, Math.min(10, newScale))
+
+    // Calculate new position to zoom centered on cursor
+    const mousePointTo = {
+      x: (pointer.x - viewport.x) / oldScale,
+      y: (pointer.y - viewport.y) / oldScale,
+    }
+
+    setViewport({
+      scale: clampedScale,
+      x: pointer.x - mousePointTo.x * clampedScale,
+      y: pointer.y - mousePointTo.y * clampedScale,
+    })
+  }
+
+  // Handle pan start
+  const handlePanStart = (e: any) => {
+    // Middle mouse button or Space + left click
+    if (e.evt.button === 1 || (spacePressed && e.evt.button === 0)) {
+      isPanning.current = true
+      e.evt.preventDefault()
+    }
+  }
+
+  // Handle pan move
+  const handlePanMove = (e: any) => {
+    if (!isPanning.current) return
+
+    const stage = stageRef.current
+    if (!stage) return
+
+    setViewport({
+      x: viewport.x + e.evt.movementX,
+      y: viewport.y + e.evt.movementY,
+    })
+  }
+
+  // Handle space key for pan
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        setSpacePressed(true)
+        e.preventDefault()
+      }
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setSpacePressed(false)
+        isPanning.current = false
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   const renderShape = (sh: Shape) => {
     const isSelected = sh.id === selectedId
@@ -411,14 +501,22 @@ export default function CanvasStage() {
       <Stage
         width={size.w}
         height={size.h}
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onWheel={(e: any) => {
-          e.evt.preventDefault()
-          const dir = e.evt.deltaY > 0 ? 0.9 : 1.1
-          setBgT({ scale: Math.max(0.2, Math.min(6, bgT.scale * dir)) })
+        scaleX={viewport.scale}
+        scaleY={viewport.scale}
+        x={viewport.x}
+        y={viewport.y}
+        ref={stageRef}
+        onPointerDown={(e) => {
+          handlePanStart(e)
+          if (!isPanning.current) onDown(e)
         }}
+        onPointerMove={(e) => {
+          handlePanMove(e)
+          if (!isPanning.current) onMove(e)
+        }}
+        onPointerUp={onUp}
+        onWheel={handleWheel}
+        style={{ cursor: isPanning.current || spacePressed ? 'grab' : 'default' }}
       >
         {/* Non-SVG shapes (user-drawn shapes) */}
         <Layer>{shapes.filter(s => !isSvgShape(s)).map(renderShape)}</Layer>
