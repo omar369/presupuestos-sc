@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import { PageBreadcrumb } from '@/components/PageBreadcrumb'
 
 async function getTrabajos() {
     const h = await headers()
@@ -14,6 +15,8 @@ export default async function TrabajosPage() {
 
     return (
         <main className="p-4 flex flex-col gap-4">
+            <PageBreadcrumb segments={[{ label: 'Trabajos' }]} />
+
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold">Trabajos</h1>
                 <Link

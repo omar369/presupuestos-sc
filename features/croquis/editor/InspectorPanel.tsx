@@ -6,56 +6,12 @@ import { useCroquisStore } from '../store/useCroquisStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
-import AddAreaButton from './AddAreaButton'
+import { MousePointer2 } from 'lucide-react'
 import { type Actividad, ACTIVIDADES, SERVICE_COLORS } from '../core/actividades'
 
 const SERVICE_TYPES = ['PINTURA', 'ESMALTE', 'SELLO', 'EPOXICO', 'OTROS'] as const
 const UNITS = ['M2', 'ML'] as const
 const STATES = ['SIN_COMENZAR', 'EN_PROCESO', 'TERMINADO'] as const
-
-function Num({
-  label,
-  value,
-  onChange,
-  min,
-  max,
-  step = 1,
-}: {
-  label: string
-  value: number
-  onChange: (v: number) => void
-  min?: number
-  max?: number
-  step?: number
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-xs">
-      <span className="opacity-80">{label}</span>
-      <input
-        type="number"
-        value={Number.isFinite(value) ? value : 0}
-        min={min}
-        max={max}
-        step={step}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
-      />
-    </label>
-  )
-}
-
-function Txt({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="flex flex-col gap-1 text-xs">
-      <span className="opacity-80">{label}</span>
-      <input
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-        className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
-      />
-    </label>
-  )
-}
 
 type ServiceMeta = {
   tipoServicio: (typeof SERVICE_TYPES)[number]
@@ -116,7 +72,12 @@ export default function InspectorPanel() {
     if (a1?.id) updateShapeMeta(sh.id, { areaId: a1.id } as any)
   }, [sh?.id, areas, updateShapeMeta])
 
-  if (!sh) return <div className="border border-gray-200 rounded-lg p-2.5 text-xs opacity-70">Selecciona una figura</div>
+  if (!sh) return (
+    <div className="h-full flex flex-col items-center justify-center text-center p-6 opacity-40 italic text-xs gap-2">
+      <MousePointer2 className="h-8 w-8 mb-2" />
+      Selecciona una figura en el croquis para ver sus detalles.
+    </div>
+  )
 
   const isLine = sh.type === 'line' || sh.type === 'svgPolyline'
   const isRect = sh.type === 'rect' || sh.type === 'svgRect'
@@ -130,17 +91,13 @@ export default function InspectorPanel() {
   const setAreaId = (next: string) => updateShapeMeta(sh.id, { areaId: next } as any)
   const canChooseService = Boolean(areaId)
 
-  // ✅ Color por servicio: SOLO fill (no tocamos stroke)
+  // ✅ Color por servicio: Sincronizamos fill y stroke
   const applyServiceColor = (tipo: ServiceMeta['tipoServicio']) => {
     const color = SERVICE_COLORS[tipo]
     if (isLine) {
-      // líneas no tienen fill real; NO tocamos stroke si no quieres contorno
-      // si prefieres que sí cambie para distinguir: cambia a { stroke: color }
-      return
+      return updateShapeStyle(sh.id, { stroke: color })
     }
-    if (isPoly) return updateShapeStyle(sh.id, { fill: color })
-    if (isRect || isCircle) return updateShapeStyle(sh.id, { fill: color })
-    return updateShapeStyle(sh.id, { fill: color })
+    return updateShapeStyle(sh.id, { fill: color, stroke: color })
   }
 
   const setService = (patch: Partial<ServiceMeta>) => {
@@ -160,18 +117,17 @@ export default function InspectorPanel() {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-2.5 flex flex-col gap-2.5 max-w-[520px] w-full">
-      <div className="text-xs opacity-70">
-        Seleccionado: <b>{sh.type}</b>
+    <div className="flex flex-col gap-4 w-full">
+      <div className="text-[10px] uppercase font-bold tracking-widest text-gray-400">
+        Tipo: <span className="text-gray-600">{sh.type}</span>
       </div>
 
-      <AddAreaButton />
 
       {/* ✅ Área (shadcn) */}
       <div className="flex flex-col gap-1">
-        <span className="text-xs opacity-80">Área</span>
+        <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400">Área</span>
         <Select value={areaId} onValueChange={(v) => setAreaId(v)}>
-          <SelectTrigger className="h-9">
+          <SelectTrigger className="h-9 bg-slate-800 border-slate-700 text-white">
             <SelectValue placeholder="Elegir área" />
           </SelectTrigger>
           <SelectContent>
@@ -186,66 +142,18 @@ export default function InspectorPanel() {
 
       {/* Geometría + Estilos + Metadata */}
       <div className="grid grid-cols-12 gap-2">
-        {!isLine && (
-          <>
-            <div className="col-span-3">
-              <Num label="X" value={sh.x} onChange={(v) => updateShape(sh.id, { x: v } as any)} />
-            </div>
-            <div className="col-span-3">
-              <Num label="Y" value={sh.y} onChange={(v) => updateShape(sh.id, { y: v } as any)} />
-            </div>
-            <div className="col-span-6">
-              <Num label="Rotación" value={sh.rotation} min={0} max={360} onChange={(v) => updateShape(sh.id, { rotation: v } as any)} />
-            </div>
-          </>
-        )}
-
-        {isRect && (
-          <>
-            <div className="col-span-6">
-              <Num label="Ancho" value={sh.width} min={1} onChange={(v) => updateShape(sh.id, { width: v } as any)} />
-            </div>
-            <div className="col-span-6">
-              <Num label="Alto" value={sh.height} min={1} onChange={(v) => updateShape(sh.id, { height: v } as any)} />
-            </div>
-          </>
-        )}
-
-        {isCircle && (
-          <div className="col-span-6">
-            <Num label="Radio" value={sh.radius} min={1} onChange={(v) => updateShape(sh.id, { radius: v } as any)} />
-          </div>
-        )}
-
         {isPoly && (
           <>
-            <div className="col-span-4 text-xs opacity-75 self-end">
-              Vértices: <b>{sh.points.length / 2}</b>
+            <div className="col-span-4 text-[10px] text-slate-400 self-end">
+              Vértices: <b className="text-white">{sh.points.length / 2}</b>
             </div>
             <div className="col-span-8 flex gap-2 flex-wrap">
-              <button onClick={() => insertPolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold hover:bg-gray-50 transition-colors">
+              <button onClick={() => insertPolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-white text-xs font-bold hover:bg-slate-700 transition-colors">
                 + Nodo
               </button>
-              <button onClick={() => removePolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold hover:bg-gray-50 transition-colors">
+              <button onClick={() => removePolyNode(sh.id)} className="px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-white text-xs font-bold hover:bg-slate-700 transition-colors">
                 - Nodo
               </button>
-            </div>
-          </>
-        )}
-
-        {isLine && (
-          <>
-            <div className="col-span-3">
-              <Num label="x1" value={sh.points[0]} onChange={(v) => updateShape(sh.id, { points: [v, sh.points[1], sh.points[2], sh.points[3]] } as any)} />
-            </div>
-            <div className="col-span-3">
-              <Num label="y1" value={sh.points[1]} onChange={(v) => updateShape(sh.id, { points: [sh.points[0], v, sh.points[2], sh.points[3]] } as any)} />
-            </div>
-            <div className="col-span-3">
-              <Num label="x2" value={sh.points[2]} onChange={(v) => updateShape(sh.id, { points: [sh.points[0], sh.points[1], v, sh.points[3]] } as any)} />
-            </div>
-            <div className="col-span-3">
-              <Num label="y2" value={sh.points[3]} onChange={(v) => updateShape(sh.id, { points: [sh.points[0], sh.points[1], sh.points[2], v] } as any)} />
             </div>
           </>
         )}
@@ -257,36 +165,15 @@ export default function InspectorPanel() {
               type="color"
               value={sh.style.fill || '#000000'}
               onChange={(e) => updateShapeStyle(sh.id, { fill: e.target.value })}
-              className="h-9 w-full rounded-lg border border-gray-200"
+              className="h-9 w-full rounded-lg border border-slate-700 bg-slate-800"
             />
           </label>
         )}
-
-        <label className="col-span-3 flex flex-col gap-1 text-xs">
-          <span className="opacity-80">Stroke</span>
-          <input
-            type="color"
-            value={sh.style.stroke || '#000000'}
-            onChange={(e) => updateShapeStyle(sh.id, { stroke: e.target.value })}
-            className="h-9 w-full rounded-lg border border-gray-200"
-          />
-        </label>
-
-        <div className="col-span-3">
-          <Num label="Stroke" value={sh.style.strokeWidth} min={1} onChange={(v) => updateShapeStyle(sh.id, { strokeWidth: v })} />
-        </div>
-
-        <div className="col-span-6">
-          <Txt label="Clave" value={sh.meta.sectionId} onChange={(v) => updateShapeMeta(sh.id, { sectionId: v })} />
-        </div>
-        <div className="col-span-6">
-          <Num label="m²" value={sh.meta.metros} min={0} step={0.01} onChange={(v) => updateShapeMeta(sh.id, { metros: v })} />
-        </div>
       </div>
 
       {/* ✅ SERVICIOS (bloqueado si no hay área) */}
-      <div className="border border-gray-200 rounded-lg p-2.5 flex flex-col gap-2">
-        <div className="text-xs font-bold">Servicio</div>
+      <div className="border border-slate-800 rounded-lg p-3 bg-slate-900/50 flex flex-col gap-2">
+        <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-500">Servicio</div>
 
         {!canChooseService && (
           <div className="text-xs opacity-70">
@@ -294,11 +181,11 @@ export default function InspectorPanel() {
           </div>
         )}
 
-        <div className="grid grid-cols-12 gap-2">
+        <div className="grid grid-cols-12 gap-3">
           <div className="col-span-6 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Tipo</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Tipo</span>
             <Select disabled={!canChooseService} value={service.tipoServicio} onValueChange={(v) => setService({ tipoServicio: v as any })}>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-9 bg-slate-800 border-slate-700 text-white">
                 <SelectValue placeholder={canChooseService ? 'Selecciona' : 'Elige un área'} />
               </SelectTrigger>
               <SelectContent>
@@ -312,9 +199,9 @@ export default function InspectorPanel() {
           </div>
 
           <div className="col-span-3 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Unidad</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Unidad</span>
             <Select disabled={!canChooseService} value={service.unidad} onValueChange={(v) => setService({ unidad: v as any })}>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-9 bg-slate-800 border-slate-700 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -328,10 +215,10 @@ export default function InspectorPanel() {
           </div>
 
           <div className="col-span-3 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Cantidad</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Cantidad</span>
             <Input
               disabled={!canChooseService}
-              className="h-9"
+              className="h-9 bg-slate-800 border-slate-700 text-white"
               type="number"
               value={service.cantidad}
               onChange={(e) => setService({ cantidad: Number(e.target.value) })}
@@ -339,10 +226,10 @@ export default function InspectorPanel() {
           </div>
 
           <div className="col-span-6 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Acabado (id)</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Acabado</span>
             <Input
               disabled={!canChooseService}
-              className="h-9"
+              className="h-9 bg-slate-800 border-slate-700 text-white"
               value={service.acabadoId ?? ''}
               onChange={(e) => setService({ acabadoId: e.target.value || undefined })}
               placeholder="acabadoId"
@@ -350,10 +237,10 @@ export default function InspectorPanel() {
           </div>
 
           <div className="col-span-3 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Entrega</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Entrega</span>
             <Input
               disabled={!canChooseService}
-              className="h-9"
+              className="h-9 bg-slate-800 border-slate-700 text-white"
               value={service.fechaEntrega ?? ''}
               onChange={(e) => setService({ fechaEntrega: normalizeDate(e.target.value) })}
               placeholder="dd/mm/aa"
@@ -362,9 +249,9 @@ export default function InspectorPanel() {
           </div>
 
           <div className="col-span-3 flex flex-col gap-1">
-            <span className="text-xs opacity-80">Estado</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">Estado</span>
             <Select value={service.estado} onValueChange={() => { }} disabled>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-9 bg-slate-900 border-slate-800 text-slate-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -379,12 +266,13 @@ export default function InspectorPanel() {
 
           {canChooseService && service.tipoServicio && (
             <div className="col-span-12 flex flex-col gap-1">
-              <span className="text-xs opacity-80">Actividades</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500">Actividades</span>
               <div className="grid grid-cols-2 gap-2">
                 {ACTIVIDADES.map((a) => (
-                  <label key={a} className="flex items-center gap-2 text-xs">
+                  <label key={a} className="flex items-center gap-2 text-xs text-slate-300">
                     <input
                       type="checkbox"
+                      className="accent-blue-500"
                       checked={(service.actividades ?? []).includes(a)}
                       onChange={() => toggleActividad(a)}
                     />
@@ -397,8 +285,8 @@ export default function InspectorPanel() {
 
           <div className="col-span-12 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs opacity-80">Progreso</span>
-              <span className="text-xs font-bold">{service.porcentaje}%</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500">Progreso</span>
+              <span className="text-xs font-bold text-white">{service.porcentaje}%</span>
             </div>
             <Slider
               value={[service.porcentaje]}
@@ -412,13 +300,13 @@ export default function InspectorPanel() {
         </div>
       </div>
 
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="opacity-80">Detalles</span>
+      <label className="flex flex-col gap-1 text-[10px] uppercase font-bold tracking-widest text-gray-400">
+        <span>Detalles</span>
         <textarea
           value={sh.meta.details}
           onChange={(e) => updateShapeMeta(sh.id, { details: e.target.value })}
           rows={2}
-          className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm resize-y"
+          className="bg-slate-800 border-slate-700 text-white rounded-lg px-2.5 py-1.5 text-sm resize-y focus:ring-1 focus:ring-blue-500 outline-none"
         />
       </label>
 

@@ -139,20 +139,21 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
             </div>
           </div>
 
-          <div className="h-px bg-black/70 my-3" />
+          {/* TEMPORARILY DISABLED - presupuestoId functionality not in use */}
+          {/* <div className="h-px bg-black/70 my-3" /> */}
 
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-              Presupuestos
-            </p>
-            <div className="space-y-1">
-              <NavItem
-                href="/presupuestos/nuevo"
-                label="Nuevo"
-                onClick={handleNavItemClick}
-              />
-            </div>
-          </div>
+          {/* <div> */}
+          {/*   <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2"> */}
+          {/*     Presupuestos */}
+          {/*   </p> */}
+          {/*   <div className="space-y-1"> */}
+          {/*     <NavItem */}
+          {/*       href="/presupuestos/nuevo" */}
+          {/*       label="Nuevo" */}
+          {/*       onClick={handleNavItemClick} */}
+          {/*     /> */}
+          {/*   </div> */}
+          {/* </div> */}
         </nav>
       )}
     </aside>

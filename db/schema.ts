@@ -6,6 +6,7 @@ import {
   text,
   SQLiteTimestamp,
   index,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
@@ -72,13 +73,14 @@ export const presupuestos = sqliteTable("presupuestos", {
     .default(nowMs),
 });
 
-export const presupuestosRelations = relations(presupuestos, ({ one, many }) => ({
-  cliente: one(clientes, {
-    fields: [presupuestos.clienteId],
-    references: [clientes.id],
-  }),
-  areas: many(areas),
-}));
+// TEMPORARILY DISABLED - presupuestoId functionality not in use
+// export const presupuestosRelations = relations(presupuestos, ({ one, many }) => ({
+//   cliente: one(clientes, {
+//     fields: [presupuestos.clienteId],
+//     references: [clientes.id],
+//   }),
+//   areas: many(areas),
+// }));
 
 // Tabla de áreas que pertenecen a un presupuesto
 // export const areas = sqliteTable("areas", {
@@ -217,6 +219,36 @@ export const croquis = sqliteTable(
     updatedAt: text("updated_at").notNull(),
   },
   (t) => ({
-    trabajoIdIdx: index("croquis_trabajo_id_idx").on(t.trabajoId),
+    trabajoIdIdx: uniqueIndex("croquis_trabajo_id_idx").on(t.trabajoId),
   })
 );
+
+export const bitacoras = sqliteTable(
+  'bitacoras',
+  {
+    id: text('id').primaryKey(),
+    trabajoId: text('trabajo_id').notNull().references(() => trabajos.id, { onDelete: 'cascade' }),
+    croquisId: text('croquis_id').notNull().references(() => croquis.id, { onDelete: 'restrict' }),
+    encargadoNombre: text('encargado_nombre').notNull(),
+    fechaInicioEst: text('fecha_inicio_est').notNull(), // ISO date
+    fechaFinEst: text('fecha_fin_est').notNull(),       // ISO date
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => ({
+    trabajoIdIdx: uniqueIndex('bitacoras_trabajo_id_idx').on(t.trabajoId),
+  })
+)
+
+export const bitacoraRegistros = sqliteTable('bitacora_registros', {
+  id: text('id').primaryKey(),
+  bitacoraId: text('bitacora_id').notNull().references(() => bitacoras.id, { onDelete: 'cascade' }),
+  fecha: text('fecha').notNull(),        // ISO date (auto)
+  horaInicio: text('hora_inicio').notNull(), // "HH:MM"
+  horaFin: text('hora_fin').notNull(),       // "HH:MM"
+  empleados: integer('empleados').notNull(),
+  accidentes: text('accidentes').notNull(), // texto corto o "0"
+  notasFinales: text('notas_finales').notNull(),
+  snapshotJson: text('snapshot_json').notNull(), // copia de croquis/areas/servicios al cerrar el día
+  createdAt: text('created_at').notNull(),
+})

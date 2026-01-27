@@ -17,9 +17,10 @@ export async function GET(
         })
         .from(croquis)
         .where(eq(croquis.trabajoId, trabajoId))
-        .orderBy(desc(croquis.updatedAt))
+        .limit(1)
 
-    return NextResponse.json({ croquis: rows })
+    // Return single croquis object or null (1:1 relationship)
+    return NextResponse.json({ croquis: rows[0] || null })
 }
 
 export async function POST(
@@ -27,6 +28,21 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id: trabajoId } = await params
+
+    // Check if croquis already exists for this trabajo (1:1 relationship)
+    const existing = await db
+        .select({ id: croquis.id })
+        .from(croquis)
+        .where(eq(croquis.trabajoId, trabajoId))
+        .limit(1)
+
+    if (existing.length > 0) {
+        return NextResponse.json(
+            { error: 'Ya existe un croquis para este trabajo' },
+            { status: 409 }
+        )
+    }
+
     const id = crypto.randomUUID()
     const now = new Date().toISOString()
 

@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react'
 import { useCroquisStore } from '../store/useCroquisStore'
 
-export default function UploadBackground() {
+export default function UploadBackground({ dark }: { dark?: boolean }) {
     const inputRef = useRef<HTMLInputElement | null>(null)
     const [loading, setLoading] = useState(false)
     const setBackground = useCroquisStore((s: any) => s.setBackground)
@@ -38,14 +38,13 @@ export default function UploadBackground() {
             <button
                 onClick={pick}
                 disabled={loading}
-                style={{
-                    padding: '10px 12px',
-                    borderRadius: 10,
-                    border: '1px solid #e5e7eb',
-                    background: 'white',
-                    fontSize: 12,
-                    fontWeight: 700,
-                }}
+                className={`
+                    px-4 py-2.5 rounded-lg border text-xs font-bold transition-colors w-full
+                    ${dark
+                        ? 'bg-slate-800 border-slate-700 text-slate-100 hover:bg-slate-700 shadow-sm'
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }
+                `}
             >
                 {loading ? 'Subiendo…' : 'Subir plano (PNG/JPG/SVG)'}
             </button>

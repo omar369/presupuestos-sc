@@ -1,16 +1,18 @@
 'use client'
 import * as React from 'react'
 import dynamic from 'next/dynamic'
-import ToolPanel from './ToolPanel'
+import ToolPanel, { ShapeSelectionMessage } from './ToolPanel'
 import InspectorPanel from './InspectorPanel'
 import UploadBackground from './UploadBackground'
+import CroquisToolbar from './CroquisToolbar'
+import { PageBreadcrumb } from "@/components/PageBreadcrumb"
 import { useCroquisStore } from '../store/useCroquisStore'
 
 const CanvasStage = dynamic(() => import('./CanvasStage'), { ssr: false })
 
 type CroquisPayload = { doc: any; background: any; bgTransform: any; svgRoot: any }
 
-export default function Planos({ croquisId }: { croquisId: string }) {
+export default function Planos({ croquisId, croquisName }: { croquisId: string, croquisName?: string }) {
   const setState = useCroquisStore.setState
   const setCroquisId = useCroquisStore((s) => s.setCroquisId)
   const setTrabajoId = useCroquisStore(s => s.setTrabajoId)
@@ -43,26 +45,64 @@ export default function Planos({ croquisId }: { croquisId: string }) {
   if (loading) return <div className="p-6">Cargando croquis…</div>
 
   return (
-    <main style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <main style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Breadcrumbs & Toolbar wrapper */}
+      <div className="flex flex-col border-b border-gray-200 bg-white shadow-sm">
+        <div className="px-5 pt-4">
+          <PageBreadcrumb
+            segments={[
+              { label: 'Trabajos', href: '/herramientas/trabajos' },
+              { label: croquisName || 'Croquis' }
+            ]}
+          />
+        </div>
+        <CroquisToolbar croquisId={croquisId} />
+      </div>
+
+      {/* Canvas */}
       <section style={{ flex: 1, position: 'relative', minHeight: 0 }}>
         <CanvasStage />
       </section>
 
+      {/* Bottom Panel (Dark Theme) */}
       <section
         style={{
-          height: '280px',
-          padding: '16px',
-          borderTop: '1px solid #e5e7eb',
-          backgroundColor: '#f9fafb',
-          overflow: 'auto',
+          height: '340px',
+          padding: '20px',
+          backgroundColor: '#0f172a', // Gris muy oscuro con toque de azul (Slate 900)
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          gap: '12px',
+          boxShadow: '0 -10px 15px -3px rgb(0 0 0 / 0.1)',
+          color: '#f8fafc',
         }}
       >
-        <ToolPanel />
-        <UploadBackground />
-        <InspectorPanel />
+        <div className="w-full">
+          <ShapeSelectionMessage dark />
+        </div>
+
+        <div className="flex gap-8 h-full min-h-0">
+          {/* Col Izquierda: Creación y Carga */}
+          <div className="flex flex-col gap-4 w-1/4 min-w-[220px] border-r border-slate-800 pr-8">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Herramientas</span>
+              <ToolPanel />
+            </div>
+
+            <div className="flex flex-col gap-2 mt-auto">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Fondo del Plano</span>
+              <UploadBackground dark />
+            </div>
+          </div>
+
+          {/* Col Derecha: Inspector */}
+          <div className="flex-1 overflow-auto pr-2 custom-scrollbar">
+            <div className="flex flex-col gap-2 h-full">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Configuración de Figura</span>
+              <InspectorPanel />
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   )

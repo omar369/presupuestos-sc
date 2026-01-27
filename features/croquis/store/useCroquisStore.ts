@@ -61,6 +61,11 @@ type CroquisState = {
   areas: { id: string; nombre: string; ubicacion: 'INTERIOR' | 'EXTERIOR' }[]
   setAreas: (areas: CroquisState['areas']) => void
 
+  currentAreaId: string | null
+  setCurrentAreaId: (id: string | null) => void
+
+  refreshAreas: () => Promise<void>
+
 }
 
 // CREATE STATE DEL CROQUIS
@@ -271,6 +276,18 @@ export const useCroquisStore = create<CroquisState>((set, get) => ({
   },
   areas: [] as any[],
   setAreas: (areas: any[]) => set({ areas }),
+
+  currentAreaId: null as string | null,
+  setCurrentAreaId: (id: string | null) => set({ currentAreaId: id }),
+
+  refreshAreas: async () => {
+    const { trabajoId } = get()
+    if (!trabajoId) return
+    const r = await fetch(`/api/trabajos/${trabajoId}/areas`, { cache: 'no-store' })
+    if (!r.ok) return
+    const a = await r.json()
+    set({ areas: a.areas ?? [] })
+  },
 
 }))
 
