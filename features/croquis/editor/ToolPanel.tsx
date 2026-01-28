@@ -1,10 +1,11 @@
 'use client'
 import React from 'react'
 import { useCroquisStore } from '../store/useCroquisStore'
-import { MousePointer2, Square, Circle, Minus, BoxSelect } from 'lucide-react'
+import { MousePointer2, Move, Square, Circle, Minus, BoxSelect } from 'lucide-react'
 
 const tools = [
   { id: 'select', icon: MousePointer2, label: 'Seleccionar' },
+  { id: 'move', icon: Move, label: 'Mover' },
   { id: 'rect', icon: Square, label: 'Rectángulo' },
   { id: 'circle', icon: Circle, label: 'Círculo' },
   { id: 'line', icon: Minus, label: 'Línea' },
@@ -52,7 +53,7 @@ export default function ToolPanel() {
         {tools.map((t) => {
           const Icon = t.icon
           const isActive = tool === t.id
-          const disabled = !canDraw && t.id !== 'select'
+          const disabled = !canDraw && t.id !== 'select' && t.id !== 'move'
 
           return (
             <button

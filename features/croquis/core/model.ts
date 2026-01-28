@@ -1,4 +1,4 @@
-export type Tool = 'select' | 'rect' | 'circle' | 'line' | 'poly' | 'pan'
+export type Tool = 'select' | 'move' | 'rect' | 'circle' | 'line' | 'poly' | 'pan'
 export type ShapeType = 'rect' | 'circle' | 'line' | 'poly' | 'svgRect' | 'svgPoly' | 'svgPath' | 'svgCircle' | 'svgPolyline'
 
 export type SvgCommon = {

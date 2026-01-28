@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation'
 import { useCroquisStore } from '../store/useCroquisStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Pencil, Save, Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
+import SaveCroquisButton from './SaveCroquisButton'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,7 +20,6 @@ import {
 
 export default function CroquisToolbar({ croquisId }: { croquisId: string }) {
     const router = useRouter()
-    const saveCroquis = useCroquisStore(s => s.saveCroquis)
     const refreshAreas = useCroquisStore(s => s.refreshAreas)
     const trabajoId = useCroquisStore(s => s.trabajoId)
 
@@ -40,10 +40,6 @@ export default function CroquisToolbar({ croquisId }: { croquisId: string }) {
         loadCroquis()
     }, [croquisId])
 
-    const handleSave = async () => {
-        await saveCroquis()
-        router.push(`/herramientas/trabajos/`)
-    }
 
     const handleEditName = async () => {
         if (!editName.trim()) return
@@ -152,10 +148,12 @@ export default function CroquisToolbar({ croquisId }: { croquisId: string }) {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <Button onClick={handleSave} size="sm">
-                    <Save className="h-4 w-4 mr-2" />
+                <SaveCroquisButton
+                    variant="exit"
+                    trabajoId={trabajoId ?? undefined}
+                >
                     Guardar cambios
-                </Button>
+                </SaveCroquisButton>
             </div>
         </div>
     )

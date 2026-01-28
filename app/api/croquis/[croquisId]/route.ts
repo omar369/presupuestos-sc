@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ croquisId: string }> }) {
     const { croquisId } = await params
-    const row = await db.select({ payloadJson: croquis.payloadJson, trabajoId: croquis.trabajoId }).from(croquis).where(eq(croquis.id, croquisId)).get()
+    const row = await db.select({ name: croquis.name, payloadJson: croquis.payloadJson, trabajoId: croquis.trabajoId }).from(croquis).where(eq(croquis.id, croquisId)).get()
     if (!row) return NextResponse.json({ error: 'Croquis no encontrado' }, { status: 404 })
     return NextResponse.json({ croquis: row })
 }

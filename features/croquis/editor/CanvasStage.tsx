@@ -105,7 +105,7 @@ export default function CanvasStage() {
   }, [bgImg, size.w, size.h])
 
   const onDown = (e: any) => {
-    if (tool === 'select') {
+    if (tool === 'select' || tool === 'move') {
       const clickedOnEmpty = e.target === e.target.getStage()
       if (clickedOnEmpty) select(null)
       return
@@ -220,6 +220,12 @@ export default function CanvasStage() {
   // Handle space key for pan
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't capture space if user is typing in an input or textarea
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return
+      }
+
       if (e.code === 'Space' && !e.repeat) {
         setSpacePressed(true)
         e.preventDefault()
@@ -242,8 +248,8 @@ export default function CanvasStage() {
   const renderShape = (sh: Shape) => {
     const isSelected = sh.id === selectedId
     const common = {
-      onClick: () => tool === 'select' && select(sh.id),
-      onTap: () => tool === 'select' && select(sh.id),
+      onClick: () => (tool === 'select' || tool === 'move') && select(sh.id),
+      onTap: () => (tool === 'select' || tool === 'move') && select(sh.id),
     }
 
     if (sh.type === 'poly') {
@@ -259,7 +265,7 @@ export default function CanvasStage() {
             stroke={isSelected ? '#22C55E' : sh.style.stroke}
             strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
             opacity={isSelected ? 1 : 0.3}
-            draggable={tool === 'select'} // mover todo el polígono
+            draggable={tool === 'move'} // mover todo el polígono
             onDragEnd={(e) => {
               const dx = e.target.x()
               const dy = e.target.y()
@@ -270,7 +276,7 @@ export default function CanvasStage() {
           />
 
           {/* ✅ nodos editables */}
-          {isSelected && tool === 'select' &&
+          {isSelected && tool === 'move' &&
             Array.from({ length: sh.points.length / 2 }).map((_, idx) => {
               const i = idx * 2
               return (
@@ -307,7 +313,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : (sh.opacity ?? 0.8)}
           visible={sh.visible}
-          draggable={tool === 'select' && !sh.locked}
+          draggable={tool === 'move' && !sh.locked}
           onDragEnd={(e) => updateShape(sh.id, { x: e.target.x(), y: e.target.y() } as any)}
           x={sh.x}
           y={sh.y}
@@ -328,7 +334,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : (sh.opacity ?? 0.8)}
           visible={sh.visible}
-          draggable={tool === 'select' && !sh.locked}
+          draggable={tool === 'move' && !sh.locked}
           onDragEnd={(e) => updateShape(sh.id, { x: e.target.x(), y: e.target.y() } as any)}
         />
       )
@@ -346,7 +352,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : (sh.opacity ?? 0.8)}
           visible={sh.visible}
-          draggable={tool === 'select' && !sh.locked}
+          draggable={tool === 'move' && !sh.locked}
           onDragEnd={(e) => {
             const dx = e.target.x(), dy = e.target.y()
             e.target.position({ x: 0, y: 0 })
@@ -367,7 +373,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : (sh.opacity ?? 0.8)}
           visible={sh.visible}
-          draggable={tool === 'select' && !sh.locked}
+          draggable={tool === 'move' && !sh.locked}
           onDragEnd={(e) => {
             const dx = e.target.x(), dy = e.target.y()
             e.target.position({ x: 0, y: 0 })
@@ -390,7 +396,7 @@ export default function CanvasStage() {
           stroke={isSelected ? '#22C55E' : sh.style.stroke}
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : 0.8}
-          draggable={tool === 'select'}
+          draggable={tool === 'move'}
           onDragEnd={(e) => updateShape(sh.id, { x: e.target.x(), y: e.target.y() } as any)}
           onTransformEnd={(e) => {
             const n = e.target
@@ -418,7 +424,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : (sh.opacity ?? 0.8)}
           visible={sh.visible}
-          draggable={tool === 'select' && !sh.locked}
+          draggable={tool === 'move' && !sh.locked}
           onDragEnd={(e) => updateShape(sh.id, { x: e.target.x(), y: e.target.y() } as any)}
         />
       )
@@ -435,7 +441,7 @@ export default function CanvasStage() {
           stroke={isSelected ? '#22C55E' : sh.style.stroke}
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           opacity={isSelected ? 1 : 0.8}
-          draggable={tool === 'select'}
+          draggable={tool === 'move'}
           onDragEnd={(e) => updateShape(sh.id, { x: e.target.x(), y: e.target.y() } as any)}
           onTransformEnd={(e) => {
             const n = e.target
@@ -462,7 +468,7 @@ export default function CanvasStage() {
           strokeWidth={isSelected ? Math.max(sh.style.strokeWidth, 3) : sh.style.strokeWidth}
           lineCap="round"
           opacity={isSelected ? 1 : 0.8}
-          draggable={tool === 'select'}
+          draggable={tool === 'move'}
           onDragEnd={(e) => {
             const n = e.target
             const dx = n.x()

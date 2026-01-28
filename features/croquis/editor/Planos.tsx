@@ -52,7 +52,7 @@ export default function Planos({ croquisId, croquisName }: { croquisId: string, 
           <PageBreadcrumb
             segments={[
               { label: 'Trabajos', href: '/herramientas/trabajos' },
-              { label: croquisName || 'Croquis' }
+              { label: 'Croquis' }
             ]}
           />
         </div>
