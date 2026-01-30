@@ -8,12 +8,16 @@ type Draft = { id: string; type: Shape['type'] } | null
 type CroquisState = {
   tool: Tool
   shapes: Shape[]
-  selectedId: string | null
+  selectedId: string | null // Mantener para compatibilidad
+  selectedIds: string[] // Nueva: array de IDs seleccionados
   draft: Draft
   doc: CroquisDocument
 
   setTool: (tool: Tool) => void
-  select: (id: string | null) => void
+  select: (id: string | null) => void // Selección simple (reemplaza)
+  toggleSelection: (id: string) => void // Toggle para Shift+Click
+  clearSelection: () => void // Limpiar todas las selecciones
+  setSelection: (ids: string[]) => void // Establecer selección múltiple
 
   startDraft: (shape: Shape) => void
   updateDraft: (patch: Partial<Shape>) => void
@@ -76,6 +80,7 @@ type CroquisState = {
 export const useCroquisStore = create<CroquisState>((set, get) => ({
   tool: 'select',
   selectedId: null,
+  selectedIds: [],
   draft: null,
   shapes: [],
   svgRoot: null,
@@ -87,7 +92,30 @@ export const useCroquisStore = create<CroquisState>((set, get) => ({
   },
 
   setTool: (tool) => set({ tool }),
-  select: (id) => set({ selectedId: id }),
+
+  // Selección simple - reemplaza selección actual
+  select: (id) => set({ selectedId: id, selectedIds: id ? [id] : [] }),
+
+  // Toggle para Shift+Click - agrega o quita de selección
+  toggleSelection: (id) => set((s) => {
+    const isSelected = s.selectedIds.includes(id)
+    const newIds = isSelected
+      ? s.selectedIds.filter(x => x !== id)
+      : [...s.selectedIds, id]
+    return {
+      selectedIds: newIds,
+      selectedId: newIds.length === 1 ? newIds[0] : null
+    }
+  }),
+
+  // Limpiar todas las selecciones
+  clearSelection: () => set({ selectedId: null, selectedIds: [] }),
+
+  // Establecer selección múltiple directamente
+  setSelection: (ids) => set({
+    selectedIds: ids,
+    selectedId: ids.length === 1 ? ids[0] : null
+  }),
 
   startDraft: (shape) => {
     set((s) => ({

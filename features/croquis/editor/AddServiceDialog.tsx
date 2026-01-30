@@ -64,11 +64,13 @@ interface AddServiceDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     selectedShape: Shape | null
+    selectedShapes?: Shape[] // Opcional para modo batch
 }
 
-export default function AddServiceDialog({ open, onOpenChange, selectedShape }: AddServiceDialogProps) {
+export default function AddServiceDialog({ open, onOpenChange, selectedShape, selectedShapes }: AddServiceDialogProps) {
     const [showAddAreaDialog, setShowAddAreaDialog] = useState(false)
     const [newAreaName, setNewAreaName] = useState('')
+    const [batchCantidades, setBatchCantidades] = useState<Record<string, number>>({}) // m² por shape en batch mode
 
     const areas = useCroquisStore((s) => s.areas)
     const trabajoId = useCroquisStore((s) => s.trabajoId)
@@ -78,38 +80,96 @@ export default function AddServiceDialog({ open, onOpenChange, selectedShape }: 
     const deleteSelected = useCroquisStore((s) => s.deleteSelected)
     const duplicateSelected = useCroquisStore((s) => s.duplicateSelected)
 
-    if (!selectedShape) return null
+    const isBatchMode = selectedShapes && selectedShapes.length > 1
+    if (!selectedShape && !isBatchMode) return null
 
+    // Batch mode state
+    const [batchAreaId, setBatchAreaId] = useState('')
+    const [batchService, setBatchService] = useState<ServiceMeta>({
+        tipoServicio: 'PINTURA',
+        unidad: 'M2',
+        cantidad: 0,
+        porcentaje: 0,
+        estado: 'SIN_COMENZAR',
+        actividades: [],
+    })
+
+    // Single shape mode
     const sh = selectedShape
-    const isLine = sh.type === 'line' || sh.type === 'svgPolyline'
-    const service = ensureService(sh.meta)
-    const areaId = (sh.meta as any)?.areaId ?? ''
+    const isLine = sh ? (sh.type === 'line' || sh.type === 'svgPolyline') : false
+    const service = sh ? ensureService(sh.meta) : batchService
+    const areaId = sh ? ((sh.meta as any)?.areaId ?? '') : batchAreaId
     const canChooseService = Boolean(areaId)
 
-    const setAreaId = (next: string) => updateShapeMeta(sh.id, { areaId: next } as any)
-
-    const applyServiceColor = (tipo: ServiceMeta['tipoServicio']) => {
-        const color = SERVICE_COLORS[tipo]
-        if (isLine) {
-            return updateShapeStyle(sh.id, { stroke: color })
+    const setAreaId = (next: string) => {
+        if (isBatchMode) {
+            setBatchAreaId(next)
+            // Aplicar a todas las shapes
+            selectedShapes?.forEach(shape => updateShapeMeta(shape.id, { areaId: next } as any))
+        } else if (sh) {
+            updateShapeMeta(sh.id, { areaId: next } as any)
         }
-        return updateShapeStyle(sh.id, { fill: color, stroke: color })
+    }
+
+    const applyServiceColor = (tipo: ServiceMeta['tipoServicio'], shapeToUpdate?: Shape) => {
+        const target = shapeToUpdate || sh
+        if (!target) return
+
+        const color = SERVICE_COLORS[tipo]
+        const isLineshape = target.type === 'line' || target.type === 'svgPolyline'
+
+        if (isLineshape) {
+            return updateShapeStyle(target.id, { stroke: color })
+        }
+        return updateShapeStyle(target.id, { fill: color, stroke: color })
     }
 
     const setService = (patch: Partial<ServiceMeta>) => {
         if (!canChooseService) return
-        const next = { ...ensureService(sh.meta), ...patch }
-        const pct = next.porcentaje
-        next.estado = pct === 0 ? 'SIN_COMENZAR' : pct === 100 ? 'TERMINADO' : 'EN_PROCESO'
-        updateShapeMeta(sh.id, { service: next } as any)
-        if (patch.tipoServicio) applyServiceColor(patch.tipoServicio)
+
+        if (isBatchMode) {
+            // Modo batch: actualizar estado local
+            const next = { ...batchService, ...patch }
+            const pct = next.porcentaje
+            next.estado = pct === 0 ? 'SIN_COMENZAR' : pct === 100 ? 'TERMINADO' : 'EN_PROCESO'
+            setBatchService(next)
+
+            // Aplicar a todas las shapes (sin cantidad individual)
+            selectedShapes?.forEach(shape => {
+                const shapeMeta = { ...next }
+                // Usar cantidad del estado local por shape
+                const cantidad = batchCantidades[shape.id] ?? 0
+                shapeMeta.cantidad = cantidad
+                updateShapeMeta(shape.id, { service: shapeMeta } as any)
+                if (patch.tipoServicio) applyServiceColor(patch.tipoServicio, shape)
+            })
+        } else if (sh) {
+            // Modo single
+            const next = { ...ensureService(sh.meta), ...patch }
+            const pct = next.porcentaje
+            next.estado = pct === 0 ? 'SIN_COMENZAR' : pct === 100 ? 'TERMINADO' : 'EN_PROCESO'
+            updateShapeMeta(sh.id, { service: next } as any)
+            if (patch.tipoServicio) applyServiceColor(patch.tipoServicio)
+        }
     }
 
     const toggleActividad = (a: Actividad) => {
         if (!canChooseService) return
-        const curr = ensureService(sh.meta).actividades ?? []
-        const next = curr.includes(a) ? curr.filter((x) => x !== a) : [...curr, a]
-        updateShapeMeta(sh.id, { service: { ...ensureService(sh.meta), actividades: next } } as any)
+
+        if (isBatchMode) {
+            const curr = batchService.actividades ?? []
+            const next = curr.includes(a) ? curr.filter((x) => x !== a) : [...curr, a]
+            setBatchService({ ...batchService, actividades: next })
+
+            // Aplicar a todas
+            selectedShapes?.forEach(shape => {
+                updateShapeMeta(shape.id, { service: { ...ensureService(shape.meta), actividades: next } } as any)
+            })
+        } else if (sh) {
+            const curr = ensureService(sh.meta).actividades ?? []
+            const next = curr.includes(a) ? curr.filter((x) => x !== a) : [...curr, a]
+            updateShapeMeta(sh.id, { service: { ...ensureService(sh.meta), actividades: next } } as any)
+        }
     }
 
     const handleAddArea = async () => {
@@ -330,16 +390,18 @@ export default function AddServiceDialog({ open, onOpenChange, selectedShape }: 
                     </div>
 
                     {/* NOTAS / DETALLES */}
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[10px] uppercase font-bold text-slate-500">Notas</span>
-                        <textarea
-                            value={sh.meta.details}
-                            onChange={(e) => updateShapeMeta(sh.id, { details: e.target.value })}
-                            rows={3}
-                            className="bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 text-sm resize-y focus:ring-1 focus:ring-blue-500 outline-none"
-                            placeholder="Notas adicionales..."
-                        />
-                    </div>
+                    {sh && (
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-500">Notas</span>
+                            <textarea
+                                value={sh.meta.details}
+                                onChange={(e) => updateShapeMeta(sh.id, { details: e.target.value })}
+                                rows={3}
+                                className="bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 text-sm resize-y focus:ring-1 focus:ring-blue-500 outline-none"
+                                placeholder="Notas adicionales..."
+                            />
+                        </div>
+                    )}
 
                     {/* ACCORDION CON ACCIONES */}
                     <Accordion type="single" collapsible className="border border-slate-800 rounded-lg">

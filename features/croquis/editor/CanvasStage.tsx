@@ -31,6 +31,7 @@ export default function CanvasStage() {
   const stageRef = useRef<any>(null)
   const isPanning = useRef(false)
   const [spacePressed, setSpacePressed] = useState(false)
+  const [shiftPressed, setShiftPressed] = useState(false) // Para multi-selección
 
   const svgRoot = useCroquisStore((s: any) => s.svgRoot)
   const setSvgRoot = useCroquisStore((s: any) => s.setSvgRoot)
@@ -44,6 +45,7 @@ export default function CanvasStage() {
   const entities = useCroquisStore((s) => s.doc.entities)
   const shapes = useMemo(() => order.map(id => entities[id]).filter(Boolean), [order, entities])
   const selectedId = useCroquisStore((s) => s.selectedId)
+  const selectedIds = useCroquisStore((s) => s.selectedIds) // Múltiples selecciones
   const draft = useCroquisStore((s) => s.draft)
 
   const background = useCroquisStore((s: any) => s.background) as { url: string; mime: string | null }
@@ -52,6 +54,8 @@ export default function CanvasStage() {
   const setBgT = useCroquisStore((s) => s.setBgTransform)
 
   const select = useCroquisStore((s) => s.select)
+  const toggleSelection = useCroquisStore((s) => s.toggleSelection) // Toggle para Shift
+  const clearSelection = useCroquisStore((s) => s.clearSelection)
   const startDraft = useCroquisStore((s) => s.startDraft)
   const updateDraft = useCroquisStore((s) => s.updateDraft)
   const commitDraft = useCroquisStore((s) => s.commitDraft)
@@ -107,7 +111,10 @@ export default function CanvasStage() {
   const onDown = (e: any) => {
     if (tool === 'select' || tool === 'move') {
       const clickedOnEmpty = e.target === e.target.getStage()
-      if (clickedOnEmpty) select(null)
+      if (clickedOnEmpty && !shiftPressed) {
+        // Solo limpiar si no está Shift presionada
+        clearSelection()
+      }
       return
     }
     const p = getPointer(e)
@@ -217,7 +224,7 @@ export default function CanvasStage() {
     })
   }
 
-  // Handle space key for pan
+  // Handle space key for pan and shift for multi-select
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't capture space if user is typing in an input or textarea
@@ -230,11 +237,19 @@ export default function CanvasStage() {
         setSpacePressed(true)
         e.preventDefault()
       }
+
+      if (e.key === 'Shift' && !e.repeat) {
+        setShiftPressed(true)
+      }
     }
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
         setSpacePressed(false)
         isPanning.current = false
+      }
+
+      if (e.key === 'Shift') {
+        setShiftPressed(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -246,10 +261,26 @@ export default function CanvasStage() {
   }, [])
 
   const renderShape = (sh: Shape) => {
-    const isSelected = sh.id === selectedId
+    const isSelected = selectedIds.includes(sh.id) // Cambiar a selectedIds
     const common = {
-      onClick: () => (tool === 'select' || tool === 'move') && select(sh.id),
-      onTap: () => (tool === 'select' || tool === 'move') && select(sh.id),
+      onClick: () => {
+        if (tool !== 'select' && tool !== 'move') return
+        // Si Shift está presionada, toggle selection
+        if (shiftPressed) {
+          toggleSelection(sh.id)
+        } else {
+          // Selección normal, reemplaza anterior
+          select(sh.id)
+        }
+      },
+      onTap: () => {
+        if (tool !== 'select' && tool !== 'move') return
+        if (shiftPressed) {
+          toggleSelection(sh.id)
+        } else {
+          select(sh.id)
+        }
+      },
     }
 
     if (sh.type === 'poly') {
